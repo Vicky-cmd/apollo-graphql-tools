@@ -4,6 +4,10 @@
   "description": "This is plugin application that can be used to implement protection Apollo GraphQL Server",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Vicky-cmd/apollo-graphql-tools.git"
+  },
   "scripts": {
     "build": "tsc --build tsconfig.build.json",
     "test": "echo \"Error: no test specified\" && exit 1"
