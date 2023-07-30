@@ -1,0 +1,1 @@
+declare module "@infotrends/apollo-graphql-tools"
