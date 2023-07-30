@@ -2,8 +2,8 @@
   "name": "@infotrends/apollo-graphql-tools",
   "version": "1.0.0",
   "description": "This is plugin application that can be used to implement protection Apollo GraphQL Server",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/Vicky-cmd/apollo-graphql-tools.git"
