@@ -7,8 +7,9 @@ export type Scalars = {
     Float: number;
 };
 export declare enum ProtectionType {
-    Protect = "PROTECT",
-    Restrict = "RESTRICT"
+    Secure = "secure",
+    Encrypt = "encrypt",
+    Redact = "redact"
 }
 export type ProtectedDirectiveArgs = {
     fields?: Maybe<Array<Maybe<Scalars['String']>>>;

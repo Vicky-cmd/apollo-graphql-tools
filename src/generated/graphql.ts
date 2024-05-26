@@ -9,8 +9,9 @@ export type Scalars = {
 }
 
 export enum ProtectionType {
-   Protect = 'PROTECT',
-   Restrict = 'RESTRICT',
+   Secure = 'secure',
+   Encrypt = 'encrypt',
+   Redact = 'redact',
 }
 
 export type ProtectedDirectiveArgs = {

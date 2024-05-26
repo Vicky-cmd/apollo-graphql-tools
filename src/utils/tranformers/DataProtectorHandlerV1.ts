@@ -1,45 +1,8 @@
 import jsonpath, { PathComponent } from 'jsonpath'
 import _ from 'lodash'
-import { isNumber, isString } from '../utilities';
 
 export interface Dictionary<T> {
    [Key: string]: T
-}
-
-const securedDirectivesFunctionsMap: Record<string, (source:any, args:any, context:any, info:any, result:any) => Object|null> = {
-   secure: (
-      _: any,
-      __: any,
-      ___: any,
-      ____: any,
-      _____: any,
-   ) => null,
-   restrict: (
-      _: any,
-      __: any,
-      ___: any,
-      ____: any,
-      result: any,
-   ) => {
-      if (!result) return result;
-
-      if (isNumber(result)) return parseFloat(result.toString().substring(0, 2) + '0'.repeat(result.toString().length - 1));
-      else return (isString(result) ? result.substring(0, 1):String(result.substring(0, 1))) + '*'.repeat(result.length - 1);
-   },
-   encrypt: (
-      _: any,
-      __: any,
-      ___: any,
-      ____: any,
-      result: any,
-   ) => {
-      if (!result) return result;
-
-      if (isNumber(result)) return parseFloat(result.toString());
-      else if (isString(result)) 
-         result.toUpperCase()
-               .split('').reverse().join('');
-   },
 }
 
 export class DataProtectorHandler {
@@ -109,6 +72,39 @@ export class DataProtectorHandler {
       return object
    }
 
+   handleStringData = (
+      _: any,
+      args: any,
+      __: any,
+      ___: any,
+      result: string,
+   ) => {
+      if (!args || !args.directiveType) return result
+
+      if (args.directiveType === 'PROTECT')
+         return result
+            .toUpperCase()
+            .split('')
+            .reverse()
+            .join('')
+      else return result.substring(0, 1) + '*'.repeat(result.length - 1)
+   }
+
+   handleNumberData = (
+      _: any,
+      args: any,
+      __: any,
+      ___: any,
+      result: String,
+   ) => {
+      if (args.directiveType === 'PROTECT') return parseFloat(result.toString())
+      else
+         return parseFloat(
+            result.toString().substring(0, 2) +
+               '0'.repeat(result.toString().length - 1),
+         )
+   }
+
    handleListData = (
       source: any,
       args: any,
@@ -118,7 +114,7 @@ export class DataProtectorHandler {
    ) => {
       if (_.isEmpty(result)) return result
 
-      let protectedArr: any[] = []
+      let protectedArr: object[] = []
       for (let data in result) {
          protectedArr.push(
             this.handleForDataType(source, args, context, info, data),
@@ -135,7 +131,7 @@ export class DataProtectorHandler {
       info: any,
       result: String,
    ) => {
-      let protectedResult: Dictionary<any> = {}
+      let protectedResult: Dictionary<Object> = {}
       for (let key in result) {
          let data = result[key]
          protectedResult[key] = this.handleForDataType(
@@ -156,12 +152,16 @@ export class DataProtectorHandler {
       info: any,
       data: any,
    ) {
+      if (!isNaN(data as any) && !isNaN(parseFloat(data)))
+         return this.handleNumberData(source, args, context, info, data)
+      if (typeof data === 'string')
+         return this.handleStringData(source, args, context, info, data)
       if (typeof data === 'object')
          return this.handleObjectData(source, args, context, info, data)
       if (_.isArray(data))
          return this.handleListData(source, args, context, info, data)
-      
-      return securedDirectivesFunctionsMap[args.directiveType](source, args, context, info, data);
+
+      return data
    }
 }
 

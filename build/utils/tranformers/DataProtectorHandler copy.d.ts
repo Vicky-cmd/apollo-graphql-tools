@@ -8,8 +8,10 @@ export declare class DataProtectorHandler {
     handleforFields: (source: any, args: any, context: any, info: any, result: any) => any;
     chnageValueByPath(object: object, path: string, value: any): void;
     changeValuesByPath(object: object, nodes: Node[], lastPropertyName: string): object;
-    handleListData: (source: any, args: any, context: any, info: any, result: object[]) => any[];
-    handleObjectData: (source: any, args: any, context: any, info: any, result: String) => Dictionary<any>;
+    handleStringData: (_: any, args: any, __: any, ___: any, result: string) => string;
+    handleNumberData: (_: any, args: any, __: any, ___: any, result: String) => number;
+    handleListData: (source: any, args: any, context: any, info: any, result: object[]) => object[];
+    handleObjectData: (source: any, args: any, context: any, info: any, result: String) => Dictionary<Object>;
     private handleForDataType;
 }
 interface Node {
@@ -17,4 +19,4 @@ interface Node {
     value: any;
 }
 export {};
-//# sourceMappingURL=DataProtectorHandler.d.ts.map
+//# sourceMappingURL=DataProtectorHandler%20copy.d.ts.map

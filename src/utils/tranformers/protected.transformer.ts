@@ -8,18 +8,18 @@ const protectedDirectiveTransformer = ({
    schema,
    handler = new DataProtectorHandler(),
 }: TProtectedTransformerProps) => {
-   const directiveName: string = 'Protected'
+   const directiveName: string = 'Secured'
    return mapSchema(schema, {
       [MapperKind.OBJECT_TYPE]: objectConfig => {
          // Check whether this field has the specified directive
-         const protectedDirective = getDirective(
+         const securedDirective = getDirective(
             schema,
             objectConfig,
             directiveName,
          )?.[0]
 
-         if (protectedDirective) {
-            let { type, fields }: ProtectedDirectiveArgs = protectedDirective
+         if (securedDirective) {
+            let { type, fields }: ProtectedDirectiveArgs = securedDirective
 
             const config = objectConfig.toConfig()
             let keys = Object.keys(config.fields)
@@ -93,15 +93,15 @@ const protectedDirectiveTransformer = ({
          return objectConfig;
       },
       [MapperKind.OBJECT_FIELD]: fieldConfig => {
-         const protectedDirective = getDirective(
+         const securedDirective = getDirective(
             schema,
             fieldConfig,
             directiveName,
          )?.[0]
 
          const { resolve = defaultFieldResolver } = fieldConfig
-         if (protectedDirective) {
-            let { type } = protectedDirective
+         if (securedDirective) {
+            let { type } = securedDirective
             fieldConfig.resolve = async function(source, args, context, info) {
                const result = await resolve(source, args, context, info)
                //    return handler.protectData(source, args, context, info, result)

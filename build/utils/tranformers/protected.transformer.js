@@ -5,13 +5,13 @@ const utils_1 = require("@graphql-tools/utils");
 const graphql_1 = require("graphql");
 const DataProtectorHandler_js_1 = require("./DataProtectorHandler.js");
 const protectedDirectiveTransformer = ({ schema, handler = new DataProtectorHandler_js_1.DataProtectorHandler(), }) => {
-    const directiveName = 'Protected';
+    const directiveName = 'Secured';
     return (0, utils_1.mapSchema)(schema, {
         [utils_1.MapperKind.OBJECT_TYPE]: objectConfig => {
             var _a;
-            const protectedDirective = (_a = (0, utils_1.getDirective)(schema, objectConfig, directiveName)) === null || _a === void 0 ? void 0 : _a[0];
-            if (protectedDirective) {
-                let { type, fields } = protectedDirective;
+            const securedDirective = (_a = (0, utils_1.getDirective)(schema, objectConfig, directiveName)) === null || _a === void 0 ? void 0 : _a[0];
+            if (securedDirective) {
+                let { type, fields } = securedDirective;
                 const config = objectConfig.toConfig();
                 let keys = Object.keys(config.fields);
                 if (fields && fields.length > 0) {
@@ -62,10 +62,10 @@ const protectedDirectiveTransformer = ({ schema, handler = new DataProtectorHand
         },
         [utils_1.MapperKind.OBJECT_FIELD]: fieldConfig => {
             var _a;
-            const protectedDirective = (_a = (0, utils_1.getDirective)(schema, fieldConfig, directiveName)) === null || _a === void 0 ? void 0 : _a[0];
+            const securedDirective = (_a = (0, utils_1.getDirective)(schema, fieldConfig, directiveName)) === null || _a === void 0 ? void 0 : _a[0];
             const { resolve = graphql_1.defaultFieldResolver } = fieldConfig;
-            if (protectedDirective) {
-                let { type } = protectedDirective;
+            if (securedDirective) {
+                let { type } = securedDirective;
                 fieldConfig.resolve = async function (source, args, context, info) {
                     const result = await resolve(source, args, context, info);
                     return handler.protectData(source, {

@@ -6,27 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DataProtectorHandler = void 0;
 const jsonpath_1 = __importDefault(require("jsonpath"));
 const lodash_1 = __importDefault(require("lodash"));
-const utilities_1 = require("../utilities");
-const securedDirectivesFunctionsMap = {
-    secure: (_, __, ___, ____, _____) => null,
-    restrict: (_, __, ___, ____, result) => {
-        if (!result)
-            return result;
-        if ((0, utilities_1.isNumber)(result))
-            return parseFloat(result.toString().substring(0, 2) + '0'.repeat(result.toString().length - 1));
-        else
-            return ((0, utilities_1.isString)(result) ? result.substring(0, 1) : String(result.substring(0, 1))) + '*'.repeat(result.length - 1);
-    },
-    encrypt: (_, __, ___, ____, result) => {
-        if (!result)
-            return result;
-        if ((0, utilities_1.isNumber)(result))
-            return parseFloat(result.toString());
-        else if ((0, utilities_1.isString)(result))
-            result.toUpperCase()
-                .split('').reverse().join('');
-    },
-};
 class DataProtectorHandler {
     constructor() {
         this.protectData = (source, args, context, info, result) => {
@@ -48,6 +27,25 @@ class DataProtectorHandler {
                 });
             }
             return result;
+        };
+        this.handleStringData = (_, args, __, ___, result) => {
+            if (!args || !args.directiveType)
+                return result;
+            if (args.directiveType === 'PROTECT')
+                return result
+                    .toUpperCase()
+                    .split('')
+                    .reverse()
+                    .join('');
+            else
+                return result.substring(0, 1) + '*'.repeat(result.length - 1);
+        };
+        this.handleNumberData = (_, args, __, ___, result) => {
+            if (args.directiveType === 'PROTECT')
+                return parseFloat(result.toString());
+            else
+                return parseFloat(result.toString().substring(0, 2) +
+                    '0'.repeat(result.toString().length - 1));
         };
         this.handleListData = (source, args, context, info, result) => {
             if (lodash_1.default.isEmpty(result))
@@ -80,12 +78,16 @@ class DataProtectorHandler {
         return object;
     }
     handleForDataType(source, args, context, info, data) {
+        if (!isNaN(data) && !isNaN(parseFloat(data)))
+            return this.handleNumberData(source, args, context, info, data);
+        if (typeof data === 'string')
+            return this.handleStringData(source, args, context, info, data);
         if (typeof data === 'object')
             return this.handleObjectData(source, args, context, info, data);
         if (lodash_1.default.isArray(data))
             return this.handleListData(source, args, context, info, data);
-        return securedDirectivesFunctionsMap[args.directiveType](source, args, context, info, data);
+        return data;
     }
 }
 exports.DataProtectorHandler = DataProtectorHandler;
-//# sourceMappingURL=DataProtectorHandler.js.map
+//# sourceMappingURL=DataProtectorHandler%20copy.js.map
