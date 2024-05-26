@@ -14,7 +14,7 @@ const securedDirectivesFunctionsMap: Record<string, (source:any, args:any, conte
       ____: any,
       _____: any,
    ) => null,
-   restrict: (
+   redact: (
       _: any,
       __: any,
       ___: any,
@@ -37,8 +37,7 @@ const securedDirectivesFunctionsMap: Record<string, (source:any, args:any, conte
 
       if (isNumber(result)) return parseFloat(result.toString());
       else if (isString(result)) 
-         result.toUpperCase()
-               .split('').reverse().join('');
+         return result.toUpperCase().split('').reverse().join('');
    },
 }
 
