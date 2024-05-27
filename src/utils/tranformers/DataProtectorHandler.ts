@@ -6,34 +6,43 @@ export interface Dictionary<T> {
    [Key: string]: T
 }
 
+const isUserAuthorizedForResource = (_:string, __: any):boolean => {
+   return true;
+}
+
 const securedDirectivesFunctionsMap: Record<string, (source:any, args:any, context:any, info:any, result:any) => Object|null> = {
    secure: (
       _: any,
-      __: any,
-      ___: any,
+      args: any,
+      context: any,
       ____: any,
-      _____: any,
-   ) => null,
+      result: any,
+   ) => {
+      if (isUserAuthorizedForResource(args.directiveField, context)) return result;
+      else return null;
+   },
    redact: (
       _: any,
-      __: any,
-      ___: any,
+      args: any,
+      context: any,
       ____: any,
       result: any,
    ) => {
       if (!result) return result;
+      else if (isUserAuthorizedForResource(args.directiveField, context)) return result;
 
       if (isNumber(result)) return parseFloat(result.toString().substring(0, 2) + '0'.repeat(result.toString().length - 1));
       else return (isString(result) ? result.substring(0, 1):String(result.substring(0, 1))) + '*'.repeat(result.length - 1);
    },
    encrypt: (
       _: any,
-      __: any,
-      ___: any,
+      args: any,
+      context: any,
       ____: any,
       result: any,
    ) => {
       if (!result) return result;
+      else if (isUserAuthorizedForResource(args.directiveField, context)) return result;
 
       if (isNumber(result)) return parseFloat(result.toString());
       else if (isString(result)) 
@@ -68,7 +77,9 @@ export class DataProtectorHandler {
       for (let field in args.directiveFields) {
          if (_.isEmpty(field)) continue
 
-         args.handler = this
+         args.handler = this;
+         // args.directiveField = args.directiveFields?args.directiveFields.concat("."):""+args.directiveFields[field];
+         args.currentField = field;
          jsonpath.apply(
             result,
             '$..'.concat(args.directiveFields[field]),
@@ -77,7 +88,10 @@ export class DataProtectorHandler {
 
                return args.handler.handleForDataType(
                   source,
-                  args,
+                  {
+                     ...args,
+                     directiveField: args.directiveFields?args.directiveFields.concat("."):""+args.directiveFields[args.currentField],
+                  },
                   context,
                   info,
                   value,
@@ -89,7 +103,7 @@ export class DataProtectorHandler {
       return result
    }
 
-   chnageValueByPath(object: object, path: string, value: any) {
+   changeValueByPath(object: object, path: string, value: any) {
       if (Array.isArray(path) && path[0] === '$') {
          const pathWithoutFirstElement = path.slice(1)
          _.set(object, pathWithoutFirstElement, value)
@@ -98,7 +112,7 @@ export class DataProtectorHandler {
 
    changeValuesByPath(object: object, nodes: Node[], lastPropertyName: string) {
       nodes.forEach(node => {
-         this.chnageValueByPath(
+         this.changeValueByPath(
             object,
             node.path.toString().concat(lastPropertyName),
             node.value,

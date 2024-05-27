@@ -6,7 +6,7 @@ export declare class DataProtectorHandler {
     constructor();
     protectData: (source: any, args: any, context: any, info: any, result: any) => any;
     handleforFields: (source: any, args: any, context: any, info: any, result: any) => any;
-    chnageValueByPath(object: object, path: string, value: any): void;
+    changeValueByPath(object: object, path: string, value: any): void;
     changeValuesByPath(object: object, nodes: Node[], lastPropertyName: string): object;
     handleListData: (source: any, args: any, context: any, info: any, result: object[]) => any[];
     handleObjectData: (source: any, args: any, context: any, info: any, result: String) => Dictionary<any>;

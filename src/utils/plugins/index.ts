@@ -91,8 +91,8 @@ export class AuthenticationManagerPlugin<
             if (
                reqContext.operationName === 'IntrospectionQuery' ||
                reqContext.operationName === '__ApolloGetServiceDefinition__'
-            )
-               return
+            ) return;
+
             console.log(reqContext.request.http?.headers.get('authorization'))
             let context = await applyAuthenticationContext<T>({
                context: reqContext.context,
@@ -102,7 +102,6 @@ export class AuthenticationManagerPlugin<
                   ...reqContext,
                   context,
                }
-            // reqContext.context =
             console.log(reqContext.request.http?.headers.get('authorization'))
          },
       }

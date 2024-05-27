@@ -7,18 +7,30 @@ exports.DataProtectorHandler = void 0;
 const jsonpath_1 = __importDefault(require("jsonpath"));
 const lodash_1 = __importDefault(require("lodash"));
 const utilities_1 = require("../utilities");
+const isUserAuthorizedForResource = (_, __) => {
+    return true;
+};
 const securedDirectivesFunctionsMap = {
-    secure: (_, __, ___, ____, _____) => null,
-    redact: (_, __, ___, ____, result) => {
+    secure: (_, args, context, ____, result) => {
+        if (isUserAuthorizedForResource(args.directiveField, context))
+            return result;
+        else
+            return null;
+    },
+    redact: (_, args, context, ____, result) => {
         if (!result)
+            return result;
+        else if (isUserAuthorizedForResource(args.directiveField, context))
             return result;
         if ((0, utilities_1.isNumber)(result))
             return parseFloat(result.toString().substring(0, 2) + '0'.repeat(result.toString().length - 1));
         else
             return ((0, utilities_1.isString)(result) ? result.substring(0, 1) : String(result.substring(0, 1))) + '*'.repeat(result.length - 1);
     },
-    encrypt: (_, __, ___, ____, result) => {
+    encrypt: (_, args, context, ____, result) => {
         if (!result)
+            return result;
+        else if (isUserAuthorizedForResource(args.directiveField, context))
             return result;
         if ((0, utilities_1.isNumber)(result))
             return parseFloat(result.toString());
@@ -40,10 +52,14 @@ class DataProtectorHandler {
                 if (lodash_1.default.isEmpty(field))
                     continue;
                 args.handler = this;
+                args.currentField = field;
                 jsonpath_1.default.apply(result, '$..'.concat(args.directiveFields[field]), function (value) {
                     if (!value)
                         return value;
-                    return args.handler.handleForDataType(source, args, context, info, value);
+                    return args.handler.handleForDataType(source, {
+                        ...args,
+                        directiveField: args.directiveFields ? args.directiveFields.concat(".") : "" + args.directiveFields[args.currentField],
+                    }, context, info, value);
                 });
             }
             return result;
@@ -66,7 +82,7 @@ class DataProtectorHandler {
             return protectedResult;
         };
     }
-    chnageValueByPath(object, path, value) {
+    changeValueByPath(object, path, value) {
         if (Array.isArray(path) && path[0] === '$') {
             const pathWithoutFirstElement = path.slice(1);
             lodash_1.default.set(object, pathWithoutFirstElement, value);
@@ -74,7 +90,7 @@ class DataProtectorHandler {
     }
     changeValuesByPath(object, nodes, lastPropertyName) {
         nodes.forEach(node => {
-            this.chnageValueByPath(object, node.path.toString().concat(lastPropertyName), node.value);
+            this.changeValueByPath(object, node.path.toString().concat(lastPropertyName), node.value);
         });
         return object;
     }
