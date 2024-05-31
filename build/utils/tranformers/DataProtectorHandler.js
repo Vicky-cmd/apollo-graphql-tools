@@ -7,30 +7,29 @@ exports.DataProtectorHandler = void 0;
 const jsonpath_1 = __importDefault(require("jsonpath"));
 const lodash_1 = __importDefault(require("lodash"));
 const utilities_1 = require("../utilities");
-const isUserAuthorizedForResource = (_, __) => {
-    return true;
+const getUserAuthorityForResource = (parentType, directiveField, context) => {
+    console.log('directiveField', directiveField);
+    if (!context.authContext || !context.authContext.authorities || !context.authContext.authorities[parentType])
+        return false;
+    for (let authority of context.authContext.authorities[parentType]) {
+        console.log('authority', authority);
+        if (authority.resources.includes(directiveField))
+            return authority.authority;
+    }
+    return "N/A";
 };
 const securedDirectivesFunctionsMap = {
-    secure: (_, args, context, ____, result) => {
-        if (isUserAuthorizedForResource(args.directiveField, context))
-            return result;
-        else
-            return null;
-    },
-    redact: (_, args, context, ____, result) => {
+    secure: (_, __, ___, ____, _____) => null,
+    redact: (_, __, ___, ____, result) => {
         if (!result)
             return result;
-        else if (isUserAuthorizedForResource(args.directiveField, context))
-            return result;
         if ((0, utilities_1.isNumber)(result))
-            return parseFloat(result.toString().substring(0, 2) + '0'.repeat(result.toString().length - 1));
+            return parseFloat(result.toString().substring(0, 1) + '0'.repeat(result.toString().length - 1));
         else
             return ((0, utilities_1.isString)(result) ? result.substring(0, 1) : String(result.substring(0, 1))) + '*'.repeat(result.length - 1);
     },
-    encrypt: (_, args, context, ____, result) => {
+    encrypt: (_, __, ___, ____, result) => {
         if (!result)
-            return result;
-        else if (isUserAuthorizedForResource(args.directiveField, context))
             return result;
         if ((0, utilities_1.isNumber)(result))
             return parseFloat(result.toString());
@@ -43,6 +42,8 @@ class DataProtectorHandler {
         this.protectData = (source, args, context, info, result) => {
             if (!result)
                 return result;
+            args.parentType = info.parentType.name.toLowerCase();
+            args.directiveField = info.fieldName;
             if (!lodash_1.default.isEmpty(args.directiveFields))
                 return this.handleforFields(source, args, context, info, result);
             return this.handleForDataType(source, args, context, info, result);
@@ -58,7 +59,7 @@ class DataProtectorHandler {
                         return value;
                     return args.handler.handleForDataType(source, {
                         ...args,
-                        directiveField: args.directiveFields ? args.directiveFields.concat(".") : "" + args.directiveFields[args.currentField],
+                        directiveField: (args.directiveField ? args.directiveField.concat(".") : "") + args.directiveFields[args.currentField],
                     }, context, info, value);
                 });
             }
@@ -95,11 +96,15 @@ class DataProtectorHandler {
         return object;
     }
     handleForDataType(source, args, context, info, data) {
+        console.log('data', args.directiveField);
         if (typeof data === 'object')
             return this.handleObjectData(source, args, context, info, data);
         if (lodash_1.default.isArray(data))
             return this.handleListData(source, args, context, info, data);
-        return securedDirectivesFunctionsMap[args.directiveType](source, args, context, info, data);
+        let userAuthority = getUserAuthorityForResource(args.parentType, args.directiveField, context);
+        if (userAuthority === "read")
+            return data;
+        return securedDirectivesFunctionsMap[userAuthority !== "N/A" ? userAuthority : args.directiveType](source, args, context, info, data);
     }
 }
 exports.DataProtectorHandler = DataProtectorHandler;
