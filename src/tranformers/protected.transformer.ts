@@ -1,8 +1,9 @@
-import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils'
-import { defaultFieldResolver, GraphQLObjectType } from 'graphql'
-import type { GraphQLSchema } from 'graphql/type'
-import type { ProtectedDirectiveArgs } from '../../generated/graphql.js'
-import { DataProtectorHandler } from './DataProtectorHandler.js'
+import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils';
+import { defaultFieldResolver, GraphQLObjectType } from 'graphql';
+import type { ProtectedDirectiveArgs } from '../types/graphql.js';
+import type { TProtectedTransformerProps } from '../types/index.js';
+import { DataProtectorHandler } from './DataProtectorHandler.js';
+import { fieldResolver } from './fuctions.js';
 
 const protectedDirectiveTransformer = ({
    schema,
@@ -10,6 +11,7 @@ const protectedDirectiveTransformer = ({
 }: TProtectedTransformerProps) => {
    const directiveName: string = 'Secured'
    return mapSchema(schema, {
+      // This is the object level resolver
       [MapperKind.OBJECT_TYPE]: objectConfig => {
          // Check whether this field has the specified directive
          const securedDirective = getDirective(
@@ -92,6 +94,7 @@ const protectedDirectiveTransformer = ({
 
          return objectConfig;
       },
+      // This is the field level resolver
       [MapperKind.OBJECT_FIELD]: fieldConfig => {
          const securedDirective = getDirective(
             schema,
@@ -102,29 +105,25 @@ const protectedDirectiveTransformer = ({
          const { resolve = defaultFieldResolver } = fieldConfig
          if (securedDirective) {
             let { type } = securedDirective
-            fieldConfig.resolve = async function(source, args, context, info) {
-               const result = await resolve(source, args, context, info)
-               //    return handler.protectData(source, args, context, info, result)
-               return handler.protectData(
-                  source,
-                  {
-                     ...args,
-                     directiveType: type,
-                  },
-                  context,
-                  info,
-                  result,
-               )
-            }
+            fieldConfig.resolve = fieldResolver(handler, resolve, type);
+            // fieldConfig.resolve = async function(source, args, context, info) {
+            //    const result = await resolve(source, args, context, info)
+            //    return handler.protectData(
+            //       source,
+            //       {
+            //          ...args,
+            //          directiveType: type,
+            //       },
+            //       context,
+            //       info,
+            //       result,
+            //    )
+            // }
          }
          return fieldConfig
       },
    })
 }
 
-interface TProtectedTransformerProps {
-   schema: GraphQLSchema
-   handler?: DataProtectorHandler
-}
+export { protectedDirectiveTransformer };
 
-export { protectedDirectiveTransformer }

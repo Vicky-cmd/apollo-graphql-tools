@@ -1,10 +1,8 @@
-import jsonpath, { PathComponent } from 'jsonpath'
+import jsonpath from 'jsonpath'
 import _ from 'lodash'
-import { isNumber, isString } from '../utilities';
-
-export interface Dictionary<T> {
-   [Key: string]: T
-}
+import type { Dictionary, Node } from '../types'
+import { isNumber, isString } from '../utilities'
+import type { IDataProtectorHandler } from '../types'
 
 // const isUserAuthorizedForResource = (parentType: string, directiveField:string, context: any):boolean => {
 //    console.log('directiveField', directiveField);
@@ -18,55 +16,69 @@ export interface Dictionary<T> {
 
 // }
 
-const getUserAuthorityForResource = (parentType:string, directiveField:string, context:any) => {
-    console.log('directiveField', directiveField);
-    // console.log('context', context.authContext);
-    if (!context.authContext || !context.authContext.authorities || !context.authContext.authorities[parentType]) return false;
+const getUserAuthorityForResource = (
+   parentType: string,
+   directiveField: string,
+   context: any,
+) => {
+   console.log('directiveField', directiveField)
+   // console.log('context', context.authContext);
+   if (
+      !context.authContext ||
+      !context.authContext.authorities ||
+      !context.authContext.authorities[parentType]
+   )
+      return false
 
-    for (let authority of context.authContext.authorities[parentType]) {
-        console.log('authority', authority);
-        if (authority.resources.includes(directiveField)) return authority.authority;
-    }
+   for (let authority of context.authContext.authorities[parentType]) {
+      console.log('authority', authority)
+      if (authority.resources.includes(directiveField))
+         return authority.authority
+   }
 
-    return "N/A";
-};
+   return 'N/A'
+}
 
-const securedDirectivesFunctionsMap: Record<string, (source:any, args:any, context:any, info:any, result:any) => Object|null> = {
-   secure: (
-      _: any,
-      __: any,
-      ___: any,
-      ____: any,
-      _____: any,
-   ) => null,
-   redact: (
-      _: any,
-      __: any,
-      ___: any,
-      ____: any,
+const securedDirectivesFunctionsMap: Record<
+   string,
+   (
+      source: any,
+      args: any,
+      context: any,
+      info: any,
       result: any,
-   ) => {
-      if (!result) return result;
+   ) => Object | null
+> = {
+   secure: (_: any, __: any, ___: any, ____: any, _____: any) => null,
+   redact: (_: any, __: any, ___: any, ____: any, result: any) => {
+      if (!result) return result
 
-      if (isNumber(result)) return parseFloat(result.toString().substring(0, 1) + '0'.repeat(result.toString().length - 1));
-      else return (isString(result) ? result.substring(0, 1):String(result.substring(0, 1))) + '*'.repeat(result.length - 1);
+      if (isNumber(result))
+         return parseFloat(
+            result.toString().substring(0, 1) +
+               '0'.repeat(result.toString().length - 1),
+         )
+      else
+         return (
+            (isString(result)
+               ? result.substring(0, 1)
+               : String(result.substring(0, 1))) + '*'.repeat(result.length - 1)
+         )
    },
-   encrypt: (
-      _: any,
-      __: any,
-      ___: any,
-      ____: any,
-      result: any,
-   ) => {
-      if (!result) return result;
+   encrypt: (_: any, __: any, ___: any, ____: any, result: any) => {
+      if (!result) return result
 
-      if (isNumber(result)) return parseFloat(result.toString());
-      else if (isString(result)) 
-         return result.toUpperCase().split('').reverse().join('');
+      if (isNumber(result)) return parseFloat(result.toString())
+      else if (isString(result))
+         return result
+            .toUpperCase()
+            .split('')
+            .reverse()
+            .join('')
    },
 }
 
-export class DataProtectorHandler {
+export class DataProtectorHandler implements IDataProtectorHandler {
    constructor() {}
 
    protectData = (
@@ -78,8 +90,8 @@ export class DataProtectorHandler {
    ): any => {
       if (!result) return result
 
-      args.parentType = info.parentType.name.toLowerCase();
-      args.directiveField = info.fieldName;
+      args.parentType = info.parentType.name.toLowerCase()
+      args.directiveField = info.fieldName
       if (!_.isEmpty(args.directiveFields))
          return this.handleforFields(source, args, context, info, result)
       return this.handleForDataType(source, args, context, info, result)
@@ -95,8 +107,8 @@ export class DataProtectorHandler {
       for (let field in args.directiveFields) {
          if (_.isEmpty(field)) continue
 
-         args.handler = this;
-         args.currentField = field;
+         args.handler = this
+         args.currentField = field
          jsonpath.apply(
             result,
             '$..'.concat(args.directiveFields[field]),
@@ -107,7 +119,10 @@ export class DataProtectorHandler {
                   source,
                   {
                      ...args,
-                     directiveField: (args.directiveField ? args.directiveField.concat(".") : "") + args.directiveFields[args.currentField],
+                     directiveField:
+                        (args.directiveField
+                           ? args.directiveField.concat('.')
+                           : '') + args.directiveFields[args.currentField],
                   },
                   context,
                   info,
@@ -179,26 +194,27 @@ export class DataProtectorHandler {
       return protectedResult
    }
 
-   private handleForDataType(
+   handleForDataType(
       source: any,
       args: any,
       context: any,
       info: any,
       data: any,
    ) {
-      console.log('data', args.directiveField);
+      console.log('data', args.directiveField)
       if (typeof data === 'object')
          return this.handleObjectData(source, args, context, info, data)
       if (_.isArray(data))
          return this.handleListData(source, args, context, info, data)
-      
-         let userAuthority = getUserAuthorityForResource(args.parentType, args.directiveField, context);
-         if (userAuthority==="read") return data;
-         return securedDirectivesFunctionsMap[userAuthority!=="N/A"?userAuthority:args.directiveType](source, args, context, info, data);
-   }
-}
 
-interface Node {
-   path: PathComponent[]
-   value: any
+      let userAuthority = getUserAuthorityForResource(
+         args.parentType,
+         args.directiveField,
+         context,
+      )
+      if (userAuthority === 'read') return data
+      return securedDirectivesFunctionsMap[
+         userAuthority !== 'N/A' ? userAuthority : args.directiveType
+      ](source, args, context, info, data)
+   }
 }

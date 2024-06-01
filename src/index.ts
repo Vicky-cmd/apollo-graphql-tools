@@ -1,11 +1,6 @@
-export { ProtectedDirectiveArgs, ProtectionType } from './generated/graphql'
-export { Logger } from './utils/logging'
-export {
-   AuthenticationManagerPlugin,
-   IAuthPluginOptions,
-} from './utils/plugins'
-export {
-   DataProtectorHandler,
-   Dictionary,
-} from './utils/tranformers/DataProtectorHandler'
-export * from './utils/auth/authentication'
+export * from './authentication'
+export { Logger } from './logging'
+export { AuthenticationManagerPlugin, IAuthPluginOptions } from './plugins'
+export { DataProtectorHandler } from './tranformers/DataProtectorHandler'
+export { Dictionary } from './types'
+export { ProtectedDirectiveArgs, ProtectionType } from './types/graphql'

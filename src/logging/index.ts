@@ -35,4 +35,3 @@ export class Logger {
 }
 
 export const logger: Logger = new Logger()
-

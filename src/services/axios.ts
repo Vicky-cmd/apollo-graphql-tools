@@ -1,4 +1,4 @@
-import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 
 const instance = axios.create({
    baseURL: '',

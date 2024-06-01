@@ -14,14 +14,15 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DataProtectorHandler = exports.AuthenticationManagerPlugin = exports.Logger = exports.ProtectionType = void 0;
-var graphql_1 = require("./generated/graphql");
-Object.defineProperty(exports, "ProtectionType", { enumerable: true, get: function () { return graphql_1.ProtectionType; } });
-var logging_1 = require("./utils/logging");
+exports.ProtectionType = exports.DataProtectorHandler = exports.AuthenticationManagerPlugin = exports.Logger = void 0;
+__exportStar(require("./authentication"), exports);
+var logging_1 = require("./logging");
 Object.defineProperty(exports, "Logger", { enumerable: true, get: function () { return logging_1.Logger; } });
-var plugins_1 = require("./utils/plugins");
+var plugins_1 = require("./plugins");
 Object.defineProperty(exports, "AuthenticationManagerPlugin", { enumerable: true, get: function () { return plugins_1.AuthenticationManagerPlugin; } });
-var DataProtectorHandler_1 = require("./utils/tranformers/DataProtectorHandler");
+var DataProtectorHandler_1 = require("./tranformers/DataProtectorHandler");
 Object.defineProperty(exports, "DataProtectorHandler", { enumerable: true, get: function () { return DataProtectorHandler_1.DataProtectorHandler; } });
-__exportStar(require("./utils/auth/authentication"), exports);
+var types_1 = require("./types");
+var graphql_1 = require("./types/graphql");
+Object.defineProperty(exports, "ProtectionType", { enumerable: true, get: function () { return graphql_1.ProtectionType; } });
 //# sourceMappingURL=index.js.map

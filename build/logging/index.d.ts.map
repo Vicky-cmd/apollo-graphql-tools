@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../src/logging/index.ts"],"names":[],"mappings":"AAAA,qBAAa,MAAM;IAChB,aAAa,EAAE,MAAM,EAAE,CAAqC;IAC5D,eAAe,UAAW,MAAM,GAAG,SAAS,YAK3C;IAED,KAAK,EAAE,MAAM,CAAuD;IAEpE,KAAK,eAAgB,GAAG,UAIvB;IAED,IAAI,eAAgB,GAAG,UAItB;IAED,IAAI,eAAgB,GAAG,UAItB;IAED,KAAK,eAAgB,GAAG,UAIvB;CACH;AAED,eAAO,MAAM,MAAM,EAAE,MAAqB,CAAA"}
