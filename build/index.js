@@ -14,9 +14,11 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProtectionType = exports.DataProtectorHandler = exports.AuthenticationManagerPlugin = exports.Logger = void 0;
+exports.ProtectionType = exports.DataProtectorHandler = exports.AuthenticationManagerPlugin = exports.Logger = exports.EncryptionHandler = void 0;
 __exportStar(require("./authentication"), exports);
 __exportStar(require("./types"), exports);
+var encryption_1 = require("./encryption");
+Object.defineProperty(exports, "EncryptionHandler", { enumerable: true, get: function () { return encryption_1.EncryptionHandler; } });
 var logging_1 = require("./logging");
 Object.defineProperty(exports, "Logger", { enumerable: true, get: function () { return logging_1.Logger; } });
 var plugins_1 = require("./plugins");

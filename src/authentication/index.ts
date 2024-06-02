@@ -48,7 +48,8 @@ export class AuthenticationProvider<T extends ProtectorContext> {
       } catch (e) {
          this.logger.error('Error in AuthenticationProvider: ', e);
          if (e instanceof AxiosError && e.response) {
-            throw new ApolloError(String(e.status ? e.status : 500), HTTPStatus[e.status ? e.status : 500]);
+            let status = e.status ? e.status : (e.response.status ? e.response.status : 500);
+            throw new ApolloError(HTTPStatus[status], String(status));
          }
       }
       throw new ApolloError('AUTHENTICATION_FAILURE', '500');

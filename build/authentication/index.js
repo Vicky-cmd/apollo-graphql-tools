@@ -33,7 +33,8 @@ class AuthenticationProvider {
         catch (e) {
             this.logger.error('Error in AuthenticationProvider: ', e);
             if (e instanceof axios_1.AxiosError && e.response) {
-                throw new apollo_server_express_1.ApolloError(String(e.status ? e.status : 500), utils_1.HTTPStatus[e.status ? e.status : 500]);
+                let status = e.status ? e.status : (e.response.status ? e.response.status : 500);
+                throw new apollo_server_express_1.ApolloError(utils_1.HTTPStatus[status], String(status));
             }
         }
         throw new apollo_server_express_1.ApolloError('AUTHENTICATION_FAILURE', '500');
