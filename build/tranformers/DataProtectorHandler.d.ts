@@ -1,6 +1,6 @@
-import type { Dictionary, IDataProtectorHandler, Node } from '../types';
+import type { Dictionary, IDataProtectorHandler, IEncryptionManager, Node } from '../types';
 export declare class DataProtectorHandler implements IDataProtectorHandler {
-    constructor();
+    constructor(encryptor?: IEncryptionManager | undefined);
     protectData: (source: any, args: any, context: any, info: any, result: any) => any;
     handleforFields: (source: any, args: any, context: any, info: any, result: any) => any;
     changeValueByPath(object: object, path: string, value: any): void;

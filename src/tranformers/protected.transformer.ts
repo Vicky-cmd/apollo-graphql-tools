@@ -1,13 +1,12 @@
 import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils';
 import { defaultFieldResolver, GraphQLObjectType } from 'graphql';
 import type { TProtectedTransformerProps } from '../types/index.js';
-import { DataProtectorHandler } from './DataProtectorHandler.js';
 import { extractFields, fieldResolver, fieldResolverForObject } from './fuctions.js';
 import _ from 'lodash';
 
 const protectedDirectiveTransformer = ({
    schema,
-   handler = new DataProtectorHandler(),
+   handler,
 }: TProtectedTransformerProps) => {
    const directiveName: string = 'Secured'
    return mapSchema(schema, {

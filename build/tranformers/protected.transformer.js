@@ -6,10 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.protectedDirectiveTransformer = void 0;
 const utils_1 = require("@graphql-tools/utils");
 const graphql_1 = require("graphql");
-const DataProtectorHandler_js_1 = require("./DataProtectorHandler.js");
 const fuctions_js_1 = require("./fuctions.js");
 const lodash_1 = __importDefault(require("lodash"));
-const protectedDirectiveTransformer = ({ schema, handler = new DataProtectorHandler_js_1.DataProtectorHandler(), }) => {
+const protectedDirectiveTransformer = ({ schema, handler, }) => {
     const directiveName = 'Secured';
     return (0, utils_1.mapSchema)(schema, {
         [utils_1.MapperKind.OBJECT_TYPE]: objectConfig => {

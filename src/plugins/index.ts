@@ -16,49 +16,87 @@ import type {
 } from '../types';
 import { constructErrorResponseFromContext, constructResponseFromContext } from '../utils';
 import type { IAuthPluginOptions } from '../types';
+import { DataProtectorHandler } from '../tranformers/DataProtectorHandler';
+import { EncryptionHandler } from '../encryption';
 
 
 const restrictedOperations = ['IntrospectionQuery', '__ApolloGetServiceDefinition__']
 
+let config: IAuthPluginOptions = {
+   handler: new DataProtectorHandler()
+};
+
 export class AuthenticationManagerPlugin<
    T extends ProtectorContext & ExpressContext
 > implements ApolloServerPlugin<T> {
-   constructor(_: IAuthPluginOptions = {}) { }
+
+   constructor(pluginConfig: IAuthPluginOptions = {
+      enabled: true,
+      enableSchemaTransform: true,
+   }) {
+      config = pluginConfig;
+      this.initializeConfig();
+   }
+
+   initializeConfig = () => {
+      if (config.enabled === undefined) {
+         config.enabled = true;
+      } else if (config.enabled === false) {
+         logger.debug('AuthenticationManagerPlugin disabled');
+      } else {
+         if (config.enableSchemaTransform === undefined) {
+            config.enableSchemaTransform = true;
+         } else if (config.enableSchemaTransform === false) {
+            logger.debug('Schema Transform Disabled');
+         } else {
+            if (!config.handler) {
+               if (config.encryptionHandler) config.handler = new DataProtectorHandler(config.encryptionHandler);
+               else if (config.encryptionProps) config.handler = new DataProtectorHandler(new EncryptionHandler(config.encryptionProps));
+               else config.handler = new DataProtectorHandler();
+            } else {
+               logger.debug('Data Protector Handler Initialized');
+               if (config.encryptionHandler)
+                  logger.error("Invalid configuration for DataProtectorHandler... Skipping encryption handler configuration");
+            }
+         }
+      }
+   }
 
    async requestDidStart(
       _: GraphQLRequestContext<T>,
    ): Promise<void | GraphQLRequestListener<T>> {
       return {
          async responseForOperation(ctx) {
-            const { request, document } = ctx
+            const { request, document } = ctx;
             if (ctx.context.authContext?.token?.startsWith('AUTHERROR')) {
                return constructErrorResponseFromContext(ctx);
             }
-            if (request.operationName && restrictedOperations.includes(request.operationName)) return null
+            if (request.operationName && restrictedOperations.includes(request.operationName)) return null;
 
-            let transformedSchema = protectedDirectiveTransformer({
+            let transformedSchema = config?.enabled && config?.enableSchemaTransform ? protectedDirectiveTransformer({
                schema: ctx.schema,
-            })
+               handler: config.handler!,
+            }) : ctx.schema;
             const result = await execute({
                schema: transformedSchema,
                document,
                contextValue: ctx.context,
                variableValues: request.variables,
                operationName: request.operationName,
-            })
+            });
 
-            return constructResponseFromContext(ctx, result)
+            return constructResponseFromContext(ctx, result);
          },
 
          async didResolveOperation(
             reqContext: GraphQLRequestContextDidResolveOperation<T>,
          ) {
-            logger.debug("Operation Name: ", reqContext.operationName)
-            if (reqContext.operationName && restrictedOperations.includes(reqContext.operationName)) return;
+            logger.debug("Operation Name: ", reqContext.operationName);
+            if ((reqContext.operationName && restrictedOperations.includes(reqContext.operationName)) || !config?.enabled) return;
 
             let context = await applyAuthenticationContext<T>({
                context: reqContext.context,
-            })
+            });
             if (context)
                reqContext = {
                   ...reqContext,

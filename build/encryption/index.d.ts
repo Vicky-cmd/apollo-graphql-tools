@@ -1,6 +1,13 @@
-declare const encryptNumber: (value: number) => number;
-declare const decryptNumber: (value: number) => number;
-declare const encryptString: (value: string) => string;
-declare const decryptString: (value: string) => string;
-export { encryptNumber, decryptNumber, encryptString, decryptString };
+import type { EncryptionManagerProps, IEncryptionManager as IEncryptionHandler } from '../types';
+export declare class EncryptionHandler implements IEncryptionHandler {
+    private secretKey;
+    private additionFactor;
+    private multiplicationFactor;
+    private tokenizationFactors;
+    constructor({ secretKey, additionFactor, multiplicationFactor, tokenizationFactors }?: EncryptionManagerProps);
+    encryptNumber: (value: number) => number;
+    decryptNumber: (value: number) => number;
+    encryptString: (value: string) => string;
+    decryptString: (value: string) => string;
+}
 //# sourceMappingURL=index.d.ts.map

@@ -4,6 +4,11 @@ import type { Request, Response } from 'express';
 import type { GraphQLSchema } from 'graphql/type';
 import type { PathComponent } from 'jsonpath';
 export interface IAuthPluginOptions {
+    enabled?: boolean;
+    enableSchemaTransform?: boolean;
+    handler?: IDataProtectorHandler;
+    encryptionHandler?: IEncryptionManager;
+    encryptionProps?: EncryptionManagerProps;
 }
 export interface ExpressContext {
     req: Request;
@@ -47,7 +52,7 @@ export interface Node {
 }
 export interface TProtectedTransformerProps {
     schema: GraphQLSchema;
-    handler?: IDataProtectorHandler;
+    handler: IDataProtectorHandler;
 }
 export interface IDataProtectorHandler {
     protectData: (source: any, args: any, context: any, info: any, result: any) => any;
@@ -65,4 +70,16 @@ export type TokenizationFactor = {
     additionFactor: number;
     multiplicationFactor: number;
 };
+export interface EncryptionManagerProps {
+    secretKey?: string;
+    additionFactor?: number;
+    multiplicationFactor?: number;
+    tokenizationFactors?: Record<number, TokenizationFactor>;
+}
+export interface IEncryptionManager {
+    encryptNumber: (value: number) => number;
+    decryptNumber: (value: number) => number;
+    encryptString: (value: string) => string;
+    decryptString: (value: string) => string;
+}
 //# sourceMappingURL=index.d.ts.map

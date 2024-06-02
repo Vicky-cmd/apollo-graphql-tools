@@ -21,6 +21,7 @@ const getUserAuthorityForResource = (parentType, directiveField, context) => {
     }
     return 'N/A';
 };
+let encryptionHandler = new encryption_1.EncryptionHandler();
 const securedDirectivesFunctionsMap = {
     secure: (_, __, ___, ____, _____) => null,
     redact: (_, __, ___, ____, result) => {
@@ -38,13 +39,13 @@ const securedDirectivesFunctionsMap = {
         if (!result)
             return result;
         if ((0, utilities_1.isNumber)(result))
-            return (0, encryption_1.encryptNumber)(parseFloat(result));
+            return encryptionHandler.encryptNumber(parseFloat(result));
         else
-            return (0, encryption_1.encryptString)(result);
+            return encryptionHandler.encryptString(result);
     },
 };
 class DataProtectorHandler {
-    constructor() {
+    constructor(encryptor = undefined) {
         this.protectData = (source, args, context, info, result) => {
             if (!result)
                 return result;
@@ -90,6 +91,8 @@ class DataProtectorHandler {
             }
             return protectedResult;
         };
+        if (encryptor)
+            encryptionHandler = encryptor;
     }
     changeValueByPath(object, path, value) {
         if (Array.isArray(path) && path[0] === '$') {

@@ -1,8 +1,8 @@
 import jsonpath from 'jsonpath'
 import _ from 'lodash'
-import type { Dictionary, IDataProtectorHandler, Node } from '../types'
+import type { Dictionary, IDataProtectorHandler, IEncryptionManager, Node } from '../types'
 import { isNumber, isString } from '../utilities'
-import { encryptNumber, encryptString } from '../encryption'
+import { EncryptionHandler } from '../encryption'
 
 
 // const isUserAuthorizedForResource = (parentType: string, directiveField:string, context: any):boolean => {
@@ -22,23 +22,25 @@ const getUserAuthorityForResource = (
    directiveField: string,
    context: any,
 ) => {
-   console.log('directiveField', directiveField)
+   console.log('directiveField', directiveField);
    // console.log('context', context.authContext);
    if (
       !context.authContext ||
       !context.authContext.authorities ||
       !context.authContext.authorities[parentType]
    )
-      return false
+      return false;
 
    for (let authority of context.authContext.authorities[parentType]) {
-      console.log('authority', authority)
+      console.log('authority', authority);
       if (authority.resources.includes(directiveField))
-         return authority.authority
+         return authority.authority;
    }
 
-   return 'N/A'
+   return 'N/A';
 }
+
+let encryptionHandler: IEncryptionManager = new EncryptionHandler();
 
 const securedDirectivesFunctionsMap: Record<
    string,
@@ -69,13 +71,15 @@ const securedDirectivesFunctionsMap: Record<
    encrypt: (_: any, __: any, ___: any, ____: any, result: any) => {
       if (!result) return result
 
-      if (isNumber(result)) return encryptNumber(parseFloat(result));
-      else return encryptString(result);
+      if (isNumber(result)) return encryptionHandler.encryptNumber(parseFloat(result));
+      else return encryptionHandler.encryptString(result);
    },
 }
 
 export class DataProtectorHandler implements IDataProtectorHandler {
-   constructor() { }
+   constructor(encryptor: IEncryptionManager | undefined = undefined) {
+      if (encryptor) encryptionHandler = encryptor;
+   }
 
    protectData = (
       source: any,
