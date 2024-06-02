@@ -21,7 +21,7 @@ const protectedDirectiveTransformer = ({
          )?.[0]
 
          if (!securedDirective) return objectConfig;
-         
+
          let { type, fields } = securedDirective
          const config = objectConfig.toConfig()
          let keys = Object.keys(config.fields)
@@ -31,7 +31,7 @@ const protectedDirectiveTransformer = ({
                let { resolve = defaultFieldResolver } = config.fields[key];
                config.fields[key].resolve = fieldResolver(handler, resolve, type, fields);
             }
-            
+
             return new GraphQLObjectType(config);
          }
 
@@ -39,7 +39,7 @@ const protectedDirectiveTransformer = ({
             if (!fields[fieldIndex] || fields[fieldIndex] == null) continue;
 
             let fieldEntry = fields[fieldIndex]!
-            let {field, isSubArray} = extractFields(fieldEntry)
+            let { field, isSubArray } = extractFields(fieldEntry)
 
             if (keys.includes(field)) {
                let { resolve = defaultFieldResolver } = config.fields[field]
@@ -65,7 +65,7 @@ const protectedDirectiveTransformer = ({
          const { resolve = defaultFieldResolver } = fieldConfig
          let { type } = securedDirective;
          fieldConfig.resolve = fieldResolver(handler, resolve, type);
-         
+
          return fieldConfig
       },
    })

@@ -5,7 +5,7 @@ import type { GraphQLSchema } from 'graphql/type';
 import type { PathComponent } from 'jsonpath';
 
 
-export interface IAuthPluginOptions {}
+export interface IAuthPluginOptions { }
 
 export interface ExpressContext {
    req: Request
@@ -52,64 +52,64 @@ export interface IAuthProviderProps<
 
 
 export interface Dictionary<T> {
-    [Key: string]: T
+   [Key: string]: T
 }
 
 export interface Node {
-    path: PathComponent[]
-    value: any
+   path: PathComponent[]
+   value: any
 }
- 
+
 export interface TProtectedTransformerProps {
-    schema: GraphQLSchema
-    handler?: IDataProtectorHandler
+   schema: GraphQLSchema
+   handler?: IDataProtectorHandler
 }
 
 export interface IDataProtectorHandler {
-    protectData: (
-       source: any,
-       args: any,
-       context: any,
-       info: any,
-       result: any,
-    ) => any
-    handleforFields: (
-       source: any,
-       args: any,
-       context: any,
-       info: any,
-       result: any,
-    ) => any
-    changeValueByPath: (object: object, path: string, value: any) => void
-    changeValuesByPath: (object: object, nodes: Node[], lastPropertyName: string) => object
-    handleListData: (
-       source: any,
-       args: any,
-       context: any,
-       info: any,
-       result: object[],
-    ) => any
-    handleObjectData: (
-       source: any,
-       args: any,
-       context: any,
-       info: any,
-       result: String,
-    ) => any
-    handleForDataType: (
-       source: any,
-       args: any,
-       context: any,
-       info: any,
-       data: any,
-    ) => any
+   protectData: (
+      source: any,
+      args: any,
+      context: any,
+      info: any,
+      result: any,
+   ) => any
+   handleforFields: (
+      source: any,
+      args: any,
+      context: any,
+      info: any,
+      result: any,
+   ) => any
+   changeValueByPath: (object: object, path: string, value: any) => void
+   changeValuesByPath: (object: object, nodes: Node[], lastPropertyName: string) => object
+   handleListData: (
+      source: any,
+      args: any,
+      context: any,
+      info: any,
+      result: object[],
+   ) => any
+   handleObjectData: (
+      source: any,
+      args: any,
+      context: any,
+      info: any,
+      result: String,
+   ) => any
+   handleForDataType: (
+      source: any,
+      args: any,
+      context: any,
+      info: any,
+      data: any,
+   ) => any
 }
 
 export type TProtectArgs<TArgs extends object = {}> = TArgs & {
-    directiveFields: string[];
+   directiveFields: string[];
 };
 
 export type TokenizationFactor = {
-    additionFactor: number
-    multiplicationFactor: number
+   additionFactor: number
+   multiplicationFactor: number
 }

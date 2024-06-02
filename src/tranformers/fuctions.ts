@@ -13,7 +13,7 @@ export const fieldResolver = <
    directiveType: Maybe<ProtectionType>,
    directiveFields: string[] = [],
 ): GraphQLFieldResolver<TSource, TContext, TArgs, Promise<TResult>> => {
-   return async function(
+   return async function (
       source: TSource,
       args: TArgs,
       context: TContext,
@@ -41,7 +41,7 @@ export const fieldResolverForObject = <TSource, TContext, TResult = unknown>(
    resolve: GraphQLFieldResolver<TSource, TContext, TProtectArgs, TResult>,
    directiveType: Maybe<ProtectionType>,
 ): GraphQLFieldResolver<TSource, TContext, TProtectArgs, Promise<TResult>> => {
-   return async function(
+   return async function (
       source: TSource,
       args: TProtectArgs,
       context: TContext,

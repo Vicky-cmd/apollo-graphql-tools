@@ -57,12 +57,12 @@ const tokenizationFactors: Record<number, TokenizationFactor> = {
 const encryptNumber = (value: number): number => {
    if (isNaN(value)) return value
 
-   const tokenizationKey = Math.random() * 10
+   const tokenizationKey = Math.floor(Math.random() * 10)
    const tokenizationFactor = tokenizationFactors[tokenizationKey]
    return parseFloat(
       String(
          value * tokenizationFactor.multiplicationFactor +
-            tokenizationFactor.additionFactor,
+         tokenizationFactor.additionFactor,
       ) + tokenizationKey,
    )
 }

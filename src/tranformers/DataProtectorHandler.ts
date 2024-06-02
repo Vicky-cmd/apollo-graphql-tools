@@ -57,7 +57,7 @@ const securedDirectivesFunctionsMap: Record<
       if (isNumber(result))
          return parseFloat(
             result.toString().substring(0, 1) +
-               '0'.repeat(result.toString().length - 1),
+            '0'.repeat(result.toString().length - 1),
          )
       else
          return (
@@ -75,7 +75,7 @@ const securedDirectivesFunctionsMap: Record<
 }
 
 export class DataProtectorHandler implements IDataProtectorHandler {
-   constructor() {}
+   constructor() { }
 
    protectData = (
       source: any,
@@ -108,7 +108,7 @@ export class DataProtectorHandler implements IDataProtectorHandler {
          jsonpath.apply(
             result,
             '$..'.concat(args.directiveFields[field]),
-            function(value) {
+            function (value) {
                if (!value) return value
 
                return args.handler.handleForDataType(

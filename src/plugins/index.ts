@@ -23,7 +23,7 @@ const restrictedOperations = ['IntrospectionQuery', '__ApolloGetServiceDefinitio
 export class AuthenticationManagerPlugin<
    T extends ProtectorContext & ExpressContext
 > implements ApolloServerPlugin<T> {
-   constructor(_: IAuthPluginOptions = {}) {}
+   constructor(_: IAuthPluginOptions = {}) { }
 
    async requestDidStart(
       _: GraphQLRequestContext<T>,
@@ -35,7 +35,7 @@ export class AuthenticationManagerPlugin<
                return constructErrorResponseFromContext(ctx);
             }
             if (request.operationName && restrictedOperations.includes(request.operationName)) return null
-            
+
             let transformedSchema = protectedDirectiveTransformer({
                schema: ctx.schema,
             })

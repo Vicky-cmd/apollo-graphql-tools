@@ -48,7 +48,7 @@ export class AuthenticationProvider<T extends ProtectorContext> {
       } catch (e) {
          this.logger.error('Error in AuthenticationProvider: ', e);
          if (e instanceof AxiosError && e.response) {
-            throw new ApolloError(String(e.status?e.status:500), HTTPStatus[e.status?e.status:500]);
+            throw new ApolloError(String(e.status ? e.status : 500), HTTPStatus[e.status ? e.status : 500]);
          }
       }
       throw new ApolloError('AUTHENTICATION_FAILURE', '500');
@@ -91,7 +91,7 @@ export const authenticationContextProvidor = <
 
          return context;
       } catch (e) {
-         console.error((e instanceof AxiosError)?(e as AxiosError).response?.data: e);
+         console.error((e instanceof AxiosError) ? (e as AxiosError).response?.data : e);
          throw new AuthenticationError('Authentication Failed!');
       }
    }
@@ -122,7 +122,7 @@ export const applyAuthenticationContext = async <
 
       context.authContext = {
          token: 'AUTHERROR',
-         errorDetails: (e instanceof ApolloError)? e: new AuthenticationError('Authentication Failed!'),
+         errorDetails: (e instanceof ApolloError) ? e : new AuthenticationError('Authentication Failed!'),
       }
    }
 

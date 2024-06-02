@@ -59,7 +59,7 @@ const tokenizationFactors = {
 const encryptNumber = (value) => {
     if (isNaN(value))
         return value;
-    const tokenizationKey = Math.random() * 10;
+    const tokenizationKey = Math.floor(Math.random() * 10);
     const tokenizationFactor = tokenizationFactors[tokenizationKey];
     return parseFloat(String(value * tokenizationFactor.multiplicationFactor +
         tokenizationFactor.additionFactor) + tokenizationKey);
