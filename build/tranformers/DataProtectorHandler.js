@@ -7,6 +7,7 @@ exports.DataProtectorHandler = void 0;
 const jsonpath_1 = __importDefault(require("jsonpath"));
 const lodash_1 = __importDefault(require("lodash"));
 const utilities_1 = require("../utilities");
+const encryption_1 = require("../encryption");
 const getUserAuthorityForResource = (parentType, directiveField, context) => {
     console.log('directiveField', directiveField);
     if (!context.authContext ||
@@ -37,13 +38,9 @@ const securedDirectivesFunctionsMap = {
         if (!result)
             return result;
         if ((0, utilities_1.isNumber)(result))
-            return parseFloat(result.toString());
-        else if ((0, utilities_1.isString)(result))
-            return result
-                .toUpperCase()
-                .split('')
-                .reverse()
-                .join('');
+            return (0, encryption_1.encryptNumber)(parseFloat(result));
+        else
+            return (0, encryption_1.encryptString)(result);
     },
 };
 class DataProtectorHandler {

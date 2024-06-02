@@ -3,6 +3,8 @@ import type { ApolloError } from 'apollo-server-express';
 import type { Request, Response } from 'express';
 import type { GraphQLSchema } from 'graphql/type';
 import type { PathComponent } from 'jsonpath';
+export interface IAuthPluginOptions {
+}
 export interface ExpressContext {
     req: Request;
     res: Response;
@@ -56,5 +58,11 @@ export interface IDataProtectorHandler {
     handleObjectData: (source: any, args: any, context: any, info: any, result: String) => any;
     handleForDataType: (source: any, args: any, context: any, info: any, data: any) => any;
 }
-export declare const HTTPStatus: Record<string, string>;
+export type TProtectArgs<TArgs extends object = {}> = TArgs & {
+    directiveFields: string[];
+};
+export type TokenizationFactor = {
+    additionFactor: number;
+    multiplicationFactor: number;
+};
 //# sourceMappingURL=index.d.ts.map

@@ -1,9 +1,9 @@
 import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils';
 import { defaultFieldResolver, GraphQLObjectType } from 'graphql';
-import type { ProtectedDirectiveArgs } from '../types/graphql.js';
 import type { TProtectedTransformerProps } from '../types/index.js';
 import { DataProtectorHandler } from './DataProtectorHandler.js';
-import { fieldResolver } from './fuctions.js';
+import { extractFields, fieldResolver, fieldResolverForObject } from './fuctions.js';
+import _ from 'lodash';
 
 const protectedDirectiveTransformer = ({
    schema,
@@ -20,80 +20,38 @@ const protectedDirectiveTransformer = ({
             directiveName,
          )?.[0]
 
-         if (securedDirective) {
-            let { type, fields }: ProtectedDirectiveArgs = securedDirective
+         if (!securedDirective) return objectConfig;
+         
+         let { type, fields } = securedDirective
+         const config = objectConfig.toConfig()
+         let keys = Object.keys(config.fields)
 
-            const config = objectConfig.toConfig()
-            let keys = Object.keys(config.fields)
-
-            if (fields && fields.length > 0) {
-               for (let fieldIndex in fields) {
-                  if (!fields[fieldIndex] || fields[fieldIndex] == null)
-                     continue
-                  let fieldEntry = fields[fieldIndex]!
-                  let field: string = fieldEntry
-                  let isSubArray: boolean = false
-                  if (field.includes('.')) {
-                     field = field.split('.')[0]
-                     isSubArray = true
-                  }
-
-                  if (keys.includes(field)) {
-                     let configField = config.fields[field]
-                     let { resolve = defaultFieldResolver } = configField
-                     configField.resolve = async function(
-                        source,
-                        args,
-                        context,
-                        info,
-                     ) {
-                        if (isSubArray)
-                           args.directiveFields = fieldEntry
-                              .substring(
-                                 fieldEntry.indexOf('.') + 1,
-                                 fieldEntry.length,
-                              )
-                              .split('|')
-                        let result = await resolve(source, args, context, info)
-                        return handler.protectData(
-                           source,
-                           {
-                              ...args,
-                              directiveType: type,
-                           },
-                           context,
-                           info,
-                           result,
-                        )
-                     }
-                  }
-               }
-            } else {
-               for (let key in config.fields) {
-                  let field = config.fields[key]
-                  let { resolve = defaultFieldResolver } = field
-                  field.resolve = async function(source, args, context, info) {
-                     let result = await resolve(source, args, context, info)
-                     return handler.protectData(
-                        source,
-                        {
-                           ...args,
-                           directiveType: type,
-                           directiveFields: fields,
-                        },
-                        context,
-                        info,
-                        result,
-                     )
-                  }
-               }
+         if (_.isEmpty(fields)) {
+            for (let key in config.fields) {
+               let { resolve = defaultFieldResolver } = config.fields[key];
+               config.fields[key].resolve = fieldResolver(handler, resolve, type, fields);
             }
-
-            return new GraphQLObjectType(config)
+            
+            return new GraphQLObjectType(config);
          }
 
-         return objectConfig;
+         for (let fieldIndex in fields) {
+            if (!fields[fieldIndex] || fields[fieldIndex] == null) continue;
+
+            let fieldEntry = fields[fieldIndex]!
+            let {field, isSubArray} = extractFields(fieldEntry)
+
+            if (keys.includes(field)) {
+               let { resolve = defaultFieldResolver } = config.fields[field]
+               config.fields[field].resolve = fieldResolverForObject(handler, isSubArray, fieldEntry, resolve, type)
+            }
+
+
+         }
+
+         return new GraphQLObjectType(config);
       },
+
       // This is the field level resolver
       [MapperKind.OBJECT_FIELD]: fieldConfig => {
          const securedDirective = getDirective(
@@ -102,24 +60,12 @@ const protectedDirectiveTransformer = ({
             directiveName,
          )?.[0]
 
+         if (!securedDirective) return fieldConfig;
+
          const { resolve = defaultFieldResolver } = fieldConfig
-         if (securedDirective) {
-            let { type } = securedDirective
-            fieldConfig.resolve = fieldResolver(handler, resolve, type);
-            // fieldConfig.resolve = async function(source, args, context, info) {
-            //    const result = await resolve(source, args, context, info)
-            //    return handler.protectData(
-            //       source,
-            //       {
-            //          ...args,
-            //          directiveType: type,
-            //       },
-            //       context,
-            //       info,
-            //       result,
-            //    )
-            // }
-         }
+         let { type } = securedDirective;
+         fieldConfig.resolve = fieldResolver(handler, resolve, type);
+         
          return fieldConfig
       },
    })

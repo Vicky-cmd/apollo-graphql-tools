@@ -5,11 +5,11 @@ import type { Request } from 'express';
 import type { Dictionary } from 'lodash';
 import { Logger } from '../logging/index.js';
 import axios from '../services/axios.js';
-import {
+import { HTTPStatus } from '../utils';
+import type {
    AuthenticationContext,
    Context,
    ExpressContext,
-   HTTPStatus,
    IAuthProps,
    IAuthProviderProps,
    IAuthenticationProviderProps,
@@ -46,6 +46,7 @@ export class AuthenticationProvider<T extends ProtectorContext> {
             authContext: response.data,
          }
       } catch (e) {
+         this.logger.error('Error in AuthenticationProvider: ', e);
          if (e instanceof AxiosError && e.response) {
             throw new ApolloError(String(e.status?e.status:500), HTTPStatus[e.status?e.status:500]);
          }
@@ -75,9 +76,8 @@ export const authenticationContextProvidor = <
    return async (context: T) => {
       let req: Request = context.req;
       // get the user token from the headers and throw error if header token is not there
-      if (!req.headers.authorization) {
-         throw new ApolloError('Unathorized', '401');
-      }
+      if (!req.headers.authorization) throw new ApolloError('Unathorized', '401');
+
       const token = req.headers.authorization || '';
 
       try {
@@ -91,12 +91,7 @@ export const authenticationContextProvidor = <
 
          return context;
       } catch (e) {
-         if (e instanceof AxiosError) {
-            let err: AxiosError<any> = e;
-            console.error(err.response?.data);
-         } else {
-            console.error(e);
-         }
+         console.error((e instanceof AxiosError)?(e as AxiosError).response?.data: e);
          throw new AuthenticationError('Authentication Failed!');
       }
    }
@@ -111,9 +106,8 @@ export const applyAuthenticationContext = async <
    let provider: AuthenticationProvider<T> = new AuthenticationProvider<T>({});
    let req: Request = context.req;
    // get the user token from the headers
-   if (!req.headers.authorization) {
-      throw new ApolloError('Unathorized', '401')
-   }
+   if (!req.headers.authorization) throw new ApolloError('Unathorized', '401');
+
    const token = req.headers.authorization || '';
 
    context = await getContext(props.context, context);

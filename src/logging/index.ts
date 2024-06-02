@@ -10,27 +10,23 @@ export class Logger {
    level: number = this.getLoggingLevel(process.env.NODE_LOGGING_LEVEL)
 
    debug = (...message: any) => {
-      if (this.level > 0) return
-
-      console.debug(message)
+      if (this.level > 0) return;
+      console.debug(message);
    }
 
    info = (...message: any) => {
-      if (this.level > 1) return
-
-      console.info(message)
+      if (this.level > 1) return;
+      console.info(message);
    }
 
    warn = (...message: any) => {
-      if (this.level > 2) return
-
-      console.warn(message)
+      if (this.level > 2) return;
+      console.warn(message);
    }
 
    error = (...message: any) => {
-      if (this.level > 3) return
-
-      console.error(message)
+      if (this.level > 3) return;
+      console.error(message);
    }
 }
 

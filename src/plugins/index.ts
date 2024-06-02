@@ -15,6 +15,7 @@ import type {
    ProtectorContext,
 } from '../types';
 import { constructErrorResponseFromContext, constructResponseFromContext } from '../utils';
+import type { IAuthPluginOptions } from '../types';
 
 
 const restrictedOperations = ['IntrospectionQuery', '__ApolloGetServiceDefinition__']
@@ -67,5 +68,3 @@ export class AuthenticationManagerPlugin<
       }
    }
 }
-
-export interface IAuthPluginOptions {}

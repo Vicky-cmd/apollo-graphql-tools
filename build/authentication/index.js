@@ -8,7 +8,7 @@ const apollo_server_express_1 = require("apollo-server-express");
 const axios_1 = require("axios");
 const index_js_1 = require("../logging/index.js");
 const axios_js_1 = __importDefault(require("../services/axios.js"));
-const index_js_2 = require("../types/index.js");
+const utils_1 = require("../utils");
 class AuthenticationProvider {
     constructor(props) {
         this.authServiceURI = process.env.authServiceURI
@@ -31,8 +31,9 @@ class AuthenticationProvider {
             };
         }
         catch (e) {
+            this.logger.error('Error in AuthenticationProvider: ', e);
             if (e instanceof axios_1.AxiosError && e.response) {
-                throw new apollo_server_express_1.ApolloError(String(e.status ? e.status : 500), index_js_2.HTTPStatus[e.status ? e.status : 500]);
+                throw new apollo_server_express_1.ApolloError(String(e.status ? e.status : 500), utils_1.HTTPStatus[e.status ? e.status : 500]);
             }
         }
         throw new apollo_server_express_1.ApolloError('AUTHENTICATION_FAILURE', '500');
@@ -53,9 +54,8 @@ const authenticationContextProvidor = (props) => {
     return async (context) => {
         var _a;
         let req = context.req;
-        if (!req.headers.authorization) {
+        if (!req.headers.authorization)
             throw new apollo_server_express_1.ApolloError('Unathorized', '401');
-        }
         const token = req.headers.authorization || '';
         try {
             let protectorContext = await provider.authenticate({
@@ -67,13 +67,7 @@ const authenticationContextProvidor = (props) => {
             return context;
         }
         catch (e) {
-            if (e instanceof axios_1.AxiosError) {
-                let err = e;
-                console.error((_a = err.response) === null || _a === void 0 ? void 0 : _a.data);
-            }
-            else {
-                console.error(e);
-            }
+            console.error((e instanceof axios_1.AxiosError) ? (_a = e.response) === null || _a === void 0 ? void 0 : _a.data : e);
             throw new apollo_server_express_1.AuthenticationError('Authentication Failed!');
         }
     };
@@ -83,9 +77,8 @@ const applyAuthenticationContext = async (props) => {
     let { context } = props;
     let provider = new AuthenticationProvider({});
     let req = context.req;
-    if (!req.headers.authorization) {
+    if (!req.headers.authorization)
         throw new apollo_server_express_1.ApolloError('Unathorized', '401');
-    }
     const token = req.headers.authorization || '';
     context = await getContext(props.context, context);
     try {

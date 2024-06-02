@@ -4,6 +4,9 @@ import type { Request, Response } from 'express';
 import type { GraphQLSchema } from 'graphql/type';
 import type { PathComponent } from 'jsonpath';
 
+
+export interface IAuthPluginOptions {}
+
 export interface ExpressContext {
    req: Request
    res: Response
@@ -100,25 +103,13 @@ export interface IDataProtectorHandler {
        info: any,
        data: any,
     ) => any
- }
-  
-export const HTTPStatus: Record<string,string> = {
-    200: "OK",
-    201: "Created",
-    204: "No Content",
-    400: "Bad Request",
-    401: "Unauthorized",
-    403: "Forbidden",
-    404: "Not Found",
-    500: "Internal Server Error",
-    501: "Not Implemented",
-    502: "Bad Gateway",
-    503: "Service Unavailable",
-    504: "Gateway Timeout",
-    505: "HTTP Version Not Supported",
-    511: "Network Authentication Required",
-    520: "Unknown Error",
-    522: "Origin Connection Time-out",
-    524: "A Timeout Occurred",
-    525: "SSL Handshake Failed",
+}
+
+export type TProtectArgs<TArgs extends object = {}> = TArgs & {
+    directiveFields: string[];
+};
+
+export type TokenizationFactor = {
+    additionFactor: number
+    multiplicationFactor: number
 }

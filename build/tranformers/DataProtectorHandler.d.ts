@@ -1,5 +1,4 @@
-import type { Dictionary, Node } from '../types';
-import type { IDataProtectorHandler } from '../types';
+import type { Dictionary, IDataProtectorHandler, Node } from '../types';
 export declare class DataProtectorHandler implements IDataProtectorHandler {
     constructor();
     protectData: (source: any, args: any, context: any, info: any, result: any) => any;

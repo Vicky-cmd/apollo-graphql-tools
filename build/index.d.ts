@@ -1,7 +1,7 @@
 export * from './authentication';
+export * from './types';
 export { Logger } from './logging';
-export { AuthenticationManagerPlugin, IAuthPluginOptions } from './plugins';
+export { AuthenticationManagerPlugin } from './plugins';
 export { DataProtectorHandler } from './tranformers/DataProtectorHandler';
-export { Dictionary } from './types';
 export { ProtectedDirectiveArgs, ProtectionType } from './types/graphql';
 //# sourceMappingURL=index.d.ts.map

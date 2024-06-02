@@ -16,13 +16,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProtectionType = exports.DataProtectorHandler = exports.AuthenticationManagerPlugin = exports.Logger = void 0;
 __exportStar(require("./authentication"), exports);
+__exportStar(require("./types"), exports);
 var logging_1 = require("./logging");
 Object.defineProperty(exports, "Logger", { enumerable: true, get: function () { return logging_1.Logger; } });
 var plugins_1 = require("./plugins");
 Object.defineProperty(exports, "AuthenticationManagerPlugin", { enumerable: true, get: function () { return plugins_1.AuthenticationManagerPlugin; } });
 var DataProtectorHandler_1 = require("./tranformers/DataProtectorHandler");
 Object.defineProperty(exports, "DataProtectorHandler", { enumerable: true, get: function () { return DataProtectorHandler_1.DataProtectorHandler; } });
-var types_1 = require("./types");
 var graphql_1 = require("./types/graphql");
 Object.defineProperty(exports, "ProtectionType", { enumerable: true, get: function () { return graphql_1.ProtectionType; } });
 //# sourceMappingURL=index.js.map

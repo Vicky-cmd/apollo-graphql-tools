@@ -1,5 +1,5 @@
 import type { Dictionary } from 'lodash';
-import { ExpressContext, IAuthProps, IAuthProviderProps, IAuthenticationProviderProps, ProtectorContext } from '../types/index.js';
+import type { ExpressContext, IAuthProps, IAuthProviderProps, IAuthenticationProviderProps, ProtectorContext } from '../types/index.js';
 export declare class AuthenticationProvider<T extends ProtectorContext> {
     private authServiceURI;
     private logger;

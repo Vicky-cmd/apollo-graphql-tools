@@ -1,8 +1,9 @@
 import jsonpath from 'jsonpath'
 import _ from 'lodash'
-import type { Dictionary, Node } from '../types'
+import type { Dictionary, IDataProtectorHandler, Node } from '../types'
 import { isNumber, isString } from '../utilities'
-import type { IDataProtectorHandler } from '../types'
+import { encryptNumber, encryptString } from '../encryption'
+
 
 // const isUserAuthorizedForResource = (parentType: string, directiveField:string, context: any):boolean => {
 //    console.log('directiveField', directiveField);
@@ -68,13 +69,8 @@ const securedDirectivesFunctionsMap: Record<
    encrypt: (_: any, __: any, ___: any, ____: any, result: any) => {
       if (!result) return result
 
-      if (isNumber(result)) return parseFloat(result.toString())
-      else if (isString(result))
-         return result
-            .toUpperCase()
-            .split('')
-            .reverse()
-            .join('')
+      if (isNumber(result)) return encryptNumber(parseFloat(result));
+      else return encryptString(result);
    },
 }
 
