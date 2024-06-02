@@ -77,8 +77,8 @@ class EncryptionHandler {
         this.decryptNumber = (value) => {
             if (isNaN(value))
                 return value;
-            const tokenizationKey = parseInt(value.toString().substring(0, value.toString().length - 1));
-            const actualValue = parseFloat(value.toString().substring(value.toString().length - 1));
+            const tokenizationKey = parseInt(value.toString().substring(value.toString().length - 1));
+            const actualValue = parseFloat(value.toString().substring(0, value.toString().length - 1));
             const tokenizationFactor = this.tokenizationFactors[tokenizationKey];
             return ((actualValue - tokenizationFactor.additionFactor) /
                 tokenizationFactor.multiplicationFactor);
@@ -87,7 +87,7 @@ class EncryptionHandler {
             return crypto_js_1.default.AES.encrypt(value, this.secretKey).toString();
         };
         this.decryptString = (value) => {
-            return crypto_js_1.default.AES.decrypt(value, this.secretKey).toString();
+            return crypto_js_1.default.AES.decrypt(value, this.secretKey).toString(crypto_js_1.default.enc.Utf8);
         };
         if (secretKey)
             this.secretKey = secretKey;

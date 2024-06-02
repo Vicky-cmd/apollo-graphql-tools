@@ -91,10 +91,10 @@ export class EncryptionHandler implements IEncryptionHandler {
       if (isNaN(value)) return value
 
       const tokenizationKey = parseInt(
-         value.toString().substring(0, value.toString().length - 1),
+         value.toString().substring(value.toString().length - 1),
       )
       const actualValue = parseFloat(
-         value.toString().substring(value.toString().length - 1),
+         value.toString().substring(0, value.toString().length - 1),
       )
       const tokenizationFactor = this.tokenizationFactors[tokenizationKey]
       return (
@@ -104,10 +104,10 @@ export class EncryptionHandler implements IEncryptionHandler {
    }
 
    encryptString = (value: string): string => {
-      return CryptoJS.AES.encrypt(value, this.secretKey).toString()
+      return CryptoJS.AES.encrypt(value, this.secretKey).toString();
    }
 
    decryptString = (value: string): string => {
-      return CryptoJS.AES.decrypt(value, this.secretKey).toString()
+      return CryptoJS.AES.decrypt(value, this.secretKey).toString(CryptoJS.enc.Utf8);
    }
 }
