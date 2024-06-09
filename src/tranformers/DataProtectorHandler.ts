@@ -93,7 +93,7 @@ export class DataProtectorHandler implements IDataProtectorHandler {
    ): any => {
       if (!result) return result
 
-      args.parentType = this.fetchParentType(info);
+      args.parentType = this.fetchParentType(info, args.resource);
       args.directiveField = this.getDirectiveField(info);
       args.selections = this.getFieldSelections(info);
       if (!_.isEmpty(args.directiveFields))
@@ -113,7 +113,8 @@ export class DataProtectorHandler implements IDataProtectorHandler {
    getDirectiveField = (info: any) => {
       return info.parentType.name.toLowerCase() !== 'query' ? info.fieldName : "";
    }
-   fetchParentType = (info: any) => {
+   fetchParentType = (info: any, resource: string | undefined = undefined) => {
+      if (!_.isEmpty(resource)) return resource;
       return info.parentType.name.toLowerCase() !== 'query' ? info.parentType.name.toLowerCase() : info.returnType.name.toLowerCase();
    }
 

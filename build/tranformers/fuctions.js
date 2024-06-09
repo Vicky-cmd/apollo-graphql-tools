@@ -1,18 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.extractFields = exports.fieldResolverForObject = exports.fieldResolver = void 0;
-const fieldResolver = (handler, resolve, directiveType, directiveFields = []) => {
+const fieldResolver = (handler, resolve, resource, directiveType, directiveFields = []) => {
     return async function (source, args, context, info) {
         const result = await resolve(source, args, context, info);
         return handler.protectData(source, {
             ...args,
+            resource,
             directiveType,
             directiveFields,
         }, context, info, result);
     };
 };
 exports.fieldResolver = fieldResolver;
-const fieldResolverForObject = (handler, isSubArray, fieldEntry, resolve, directiveType) => {
+const fieldResolverForObject = (handler, isSubArray, fieldEntry, resolve, resource, directiveType) => {
     return async function (source, args, context, info) {
         if (isSubArray)
             args.directiveFields = fieldEntry
@@ -21,6 +22,7 @@ const fieldResolverForObject = (handler, isSubArray, fieldEntry, resolve, direct
         let result = await resolve(source, args, context, info);
         return handler.protectData(source, {
             ...args,
+            resource,
             directiveType,
         }, context, info, result);
     };

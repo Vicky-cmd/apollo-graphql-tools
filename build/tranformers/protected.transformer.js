@@ -16,7 +16,7 @@ const protectedDirectiveTransformer = ({ schema, handler, }) => {
             const securedDirective = (_a = (0, utils_1.getDirective)(schema, objectConfig, directiveName)) === null || _a === void 0 ? void 0 : _a[0];
             if (!securedDirective)
                 return objectConfig;
-            let { type, fields } = securedDirective;
+            let { type, fields, resource } = securedDirective;
             const config = objectConfig.toConfig();
             let keys = Object.keys(config.fields);
             if (lodash_1.default.isEmpty(fields)) {
@@ -33,7 +33,7 @@ const protectedDirectiveTransformer = ({ schema, handler, }) => {
                 let { field, isSubArray } = (0, fuctions_js_1.extractFields)(fieldEntry);
                 if (keys.includes(field)) {
                     let { resolve = graphql_1.defaultFieldResolver } = config.fields[field];
-                    config.fields[field].resolve = (0, fuctions_js_1.fieldResolverForObject)(handler, isSubArray, fieldEntry, resolve, type);
+                    config.fields[field].resolve = (0, fuctions_js_1.fieldResolverForObject)(handler, isSubArray, fieldEntry, resolve, resource, type);
                 }
             }
             return new graphql_1.GraphQLObjectType(config);
@@ -44,8 +44,8 @@ const protectedDirectiveTransformer = ({ schema, handler, }) => {
             if (!securedDirective)
                 return fieldConfig;
             const { resolve = graphql_1.defaultFieldResolver } = fieldConfig;
-            let { type } = securedDirective;
-            fieldConfig.resolve = (0, fuctions_js_1.fieldResolver)(handler, resolve, type);
+            let { type, resource } = securedDirective;
+            fieldConfig.resolve = (0, fuctions_js_1.fieldResolver)(handler, resolve, resource, type);
             return fieldConfig;
         },
     });

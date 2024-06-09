@@ -13,6 +13,7 @@ export declare enum ProtectionType {
 }
 export type ProtectedDirectiveArgs = {
     fields?: Maybe<Array<Maybe<Scalars['String']>>>;
+    resource?: Maybe<Scalars['String']>;
     type?: Maybe<ProtectionType>;
 };
 //# sourceMappingURL=graphql.d.ts.map

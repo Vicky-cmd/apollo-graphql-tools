@@ -52,7 +52,7 @@ class DataProtectorHandler {
         this.protectData = (source, args, context, info, result) => {
             if (!result)
                 return result;
-            args.parentType = this.fetchParentType(info);
+            args.parentType = this.fetchParentType(info, args.resource);
             args.directiveField = this.getDirectiveField(info);
             args.selections = this.getFieldSelections(info);
             if (!lodash_1.default.isEmpty(args.directiveFields))
@@ -72,7 +72,9 @@ class DataProtectorHandler {
         this.getDirectiveField = (info) => {
             return info.parentType.name.toLowerCase() !== 'query' ? info.fieldName : "";
         };
-        this.fetchParentType = (info) => {
+        this.fetchParentType = (info, resource = undefined) => {
+            if (!lodash_1.default.isEmpty(resource))
+                return resource;
             return info.parentType.name.toLowerCase() !== 'query' ? info.parentType.name.toLowerCase() : info.returnType.name.toLowerCase();
         };
         this.handleforFields = (source, args, context, info, result) => {

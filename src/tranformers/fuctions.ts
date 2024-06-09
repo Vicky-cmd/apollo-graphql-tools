@@ -10,6 +10,7 @@ export const fieldResolver = <
 >(
    handler: IDataProtectorHandler,
    resolve: GraphQLFieldResolver<TSource, TContext, TArgs, TResult>,
+   resource: string,
    directiveType: Maybe<ProtectionType>,
    directiveFields: string[] = [],
 ): GraphQLFieldResolver<TSource, TContext, TArgs, Promise<TResult>> => {
@@ -24,6 +25,7 @@ export const fieldResolver = <
          source,
          {
             ...args,
+            resource,
             directiveType,
             directiveFields,
          },
@@ -39,6 +41,7 @@ export const fieldResolverForObject = <TSource, TContext, TResult = unknown>(
    isSubArray: boolean,
    fieldEntry: string,
    resolve: GraphQLFieldResolver<TSource, TContext, TProtectArgs, TResult>,
+   resource: string,
    directiveType: Maybe<ProtectionType>,
 ): GraphQLFieldResolver<TSource, TContext, TProtectArgs, Promise<TResult>> => {
    return async function (
@@ -56,6 +59,7 @@ export const fieldResolverForObject = <TSource, TContext, TResult = unknown>(
          source,
          {
             ...args,
+            resource,
             directiveType,
          },
          context,

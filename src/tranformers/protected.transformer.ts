@@ -21,7 +21,7 @@ const protectedDirectiveTransformer = ({
 
          if (!securedDirective) return objectConfig;
 
-         let { type, fields } = securedDirective
+         let { type, fields, resource } = securedDirective
          const config = objectConfig.toConfig()
          let keys = Object.keys(config.fields)
 
@@ -42,7 +42,7 @@ const protectedDirectiveTransformer = ({
 
             if (keys.includes(field)) {
                let { resolve = defaultFieldResolver } = config.fields[field]
-               config.fields[field].resolve = fieldResolverForObject(handler, isSubArray, fieldEntry, resolve, type)
+               config.fields[field].resolve = fieldResolverForObject(handler, isSubArray, fieldEntry, resolve, resource, type)
             }
 
 
@@ -62,8 +62,8 @@ const protectedDirectiveTransformer = ({
          if (!securedDirective) return fieldConfig;
 
          const { resolve = defaultFieldResolver } = fieldConfig
-         let { type } = securedDirective;
-         fieldConfig.resolve = fieldResolver(handler, resolve, type);
+         let { type, resource } = securedDirective;
+         fieldConfig.resolve = fieldResolver(handler, resolve, resource, type);
 
          return fieldConfig
       },
