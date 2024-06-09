@@ -29,15 +29,18 @@ const getUserAuthorityForResource = (
       !context.authContext.authorities ||
       !context.authContext.authorities[parentType]
    )
-      return false;
+      return 'N/A';
 
+   let defaultAuthority = "N/A";
    for (let authority of context.authContext.authorities[parentType]) {
       console.log('authority', authority);
       if (authority.resources.includes(directiveField))
          return authority.authority;
+      else if (authority.resources.includes('*'))
+         defaultAuthority = authority.authority;
    }
 
-   return 'N/A';
+   return defaultAuthority;
 }
 
 let encryptionHandler: IEncryptionManager = new EncryptionHandler();
@@ -90,11 +93,28 @@ export class DataProtectorHandler implements IDataProtectorHandler {
    ): any => {
       if (!result) return result
 
-      args.parentType = info.parentType.name.toLowerCase()
-      args.directiveField = info.fieldName
+      args.parentType = this.fetchParentType(info);
+      args.directiveField = this.getDirectiveField(info);
+      args.selections = this.getFieldSelections(info);
       if (!_.isEmpty(args.directiveFields))
          return this.handleforFields(source, args, context, info, result)
       return this.handleForDataType(source, args, context, info, result)
+   }
+
+   getFieldSelections = (info: any) => {
+      if (info.parentType.name.toLowerCase() !== 'query') return [];
+      for (let field of info.fieldNodes) {
+         if (field.selectionSet && info.fieldName === field.name.value) {
+            return field.selectionSet.selections;
+         }
+      }
+      return [];
+   }
+   getDirectiveField = (info: any) => {
+      return info.parentType.name.toLowerCase() !== 'query' ? info.fieldName : "";
+   }
+   fetchParentType = (info: any) => {
+      return info.parentType.name.toLowerCase() !== 'query' ? info.parentType.name.toLowerCase() : info.returnType.name.toLowerCase();
    }
 
    handleforFields = (
@@ -165,9 +185,9 @@ export class DataProtectorHandler implements IDataProtectorHandler {
 
       let protectedArr: any[] = []
       for (let data in result) {
-         protectedArr.push(
-            this.handleForDataType(source, args, context, info, data),
-         )
+         let protectedData: any = this.handleForDataType(source, args, context, info, data);
+         if (protectedData && protectedData !== null)
+            protectedArr.push(protectedData);
       }
 
       return protectedArr
@@ -180,18 +200,30 @@ export class DataProtectorHandler implements IDataProtectorHandler {
       info: any,
       result: String,
    ) => {
-      let protectedResult: Dictionary<any> = {}
-      for (let key in result) {
+      if (args.selections !== undefined && args.selections.length === 0) return result;
+
+      let isValid = false;
+      let protectedResult: Dictionary<any> = result;
+      for (let selectionKey in args.selections) {
+         let key = args.selections[selectionKey].name.value;
          let data = result[key]
          protectedResult[key] = this.handleForDataType(
             source,
-            args,
+            {
+               ...args,
+               directiveField: (args.directiveField
+                  ? args.directiveField.concat('.')
+                  : '') + key,
+               selections: args.selections[selectionKey].selectionSet?.selections
+            },
             context,
             info,
             data,
          )
+         if (protectedResult[key] !== null)
+            isValid = true;
       }
-      return protectedResult
+      return isValid ? protectedResult : null;
    }
 
    handleForDataType(
@@ -212,7 +244,8 @@ export class DataProtectorHandler implements IDataProtectorHandler {
          args.directiveField,
          context,
       )
-      if (userAuthority === 'read') return data
+      if (userAuthority === 'read' && info.parentType.name.toLowerCase() === 'query') return data
+      else if (userAuthority === 'write' && info.parentType.name.toLowerCase() === 'query') userAuthority = 'N/A';
       return securedDirectivesFunctionsMap[
          userAuthority !== 'N/A' ? userAuthority : args.directiveType
       ](source, args, context, info, data)

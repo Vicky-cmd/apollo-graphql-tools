@@ -13,13 +13,16 @@ const getUserAuthorityForResource = (parentType, directiveField, context) => {
     if (!context.authContext ||
         !context.authContext.authorities ||
         !context.authContext.authorities[parentType])
-        return false;
+        return 'N/A';
+    let defaultAuthority = "N/A";
     for (let authority of context.authContext.authorities[parentType]) {
         console.log('authority', authority);
         if (authority.resources.includes(directiveField))
             return authority.authority;
+        else if (authority.resources.includes('*'))
+            defaultAuthority = authority.authority;
     }
-    return 'N/A';
+    return defaultAuthority;
 };
 let encryptionHandler = new encryption_1.EncryptionHandler();
 const securedDirectivesFunctionsMap = {
@@ -49,11 +52,28 @@ class DataProtectorHandler {
         this.protectData = (source, args, context, info, result) => {
             if (!result)
                 return result;
-            args.parentType = info.parentType.name.toLowerCase();
-            args.directiveField = info.fieldName;
+            args.parentType = this.fetchParentType(info);
+            args.directiveField = this.getDirectiveField(info);
+            args.selections = this.getFieldSelections(info);
             if (!lodash_1.default.isEmpty(args.directiveFields))
                 return this.handleforFields(source, args, context, info, result);
             return this.handleForDataType(source, args, context, info, result);
+        };
+        this.getFieldSelections = (info) => {
+            if (info.parentType.name.toLowerCase() !== 'query')
+                return [];
+            for (let field of info.fieldNodes) {
+                if (field.selectionSet && info.fieldName === field.name.value) {
+                    return field.selectionSet.selections;
+                }
+            }
+            return [];
+        };
+        this.getDirectiveField = (info) => {
+            return info.parentType.name.toLowerCase() !== 'query' ? info.fieldName : "";
+        };
+        this.fetchParentType = (info) => {
+            return info.parentType.name.toLowerCase() !== 'query' ? info.parentType.name.toLowerCase() : info.returnType.name.toLowerCase();
         };
         this.handleforFields = (source, args, context, info, result) => {
             for (let field in args.directiveFields) {
@@ -79,17 +99,32 @@ class DataProtectorHandler {
                 return result;
             let protectedArr = [];
             for (let data in result) {
-                protectedArr.push(this.handleForDataType(source, args, context, info, data));
+                let protectedData = this.handleForDataType(source, args, context, info, data);
+                if (protectedData && protectedData !== null)
+                    protectedArr.push(protectedData);
             }
             return protectedArr;
         };
         this.handleObjectData = (source, args, context, info, result) => {
-            let protectedResult = {};
-            for (let key in result) {
+            var _a;
+            if (args.selections !== undefined && args.selections.length === 0)
+                return result;
+            let isValid = false;
+            let protectedResult = result;
+            for (let selectionKey in args.selections) {
+                let key = args.selections[selectionKey].name.value;
                 let data = result[key];
-                protectedResult[key] = this.handleForDataType(source, args, context, info, data);
+                protectedResult[key] = this.handleForDataType(source, {
+                    ...args,
+                    directiveField: (args.directiveField
+                        ? args.directiveField.concat('.')
+                        : '') + key,
+                    selections: (_a = args.selections[selectionKey].selectionSet) === null || _a === void 0 ? void 0 : _a.selections
+                }, context, info, data);
+                if (protectedResult[key] !== null)
+                    isValid = true;
             }
-            return protectedResult;
+            return isValid ? protectedResult : null;
         };
         if (encryptor)
             encryptionHandler = encryptor;
@@ -113,8 +148,10 @@ class DataProtectorHandler {
         if (lodash_1.default.isArray(data))
             return this.handleListData(source, args, context, info, data);
         let userAuthority = getUserAuthorityForResource(args.parentType, args.directiveField, context);
-        if (userAuthority === 'read')
+        if (userAuthority === 'read' && info.parentType.name.toLowerCase() === 'query')
             return data;
+        else if (userAuthority === 'write' && info.parentType.name.toLowerCase() === 'query')
+            userAuthority = 'N/A';
         return securedDirectivesFunctionsMap[userAuthority !== 'N/A' ? userAuthority : args.directiveType](source, args, context, info, data);
     }
 }
