@@ -26,6 +26,7 @@ const getUserAuthorityForResource = (parentType, directiveField, context) => {
 };
 let encryptionHandler = new encryption_1.EncryptionHandler();
 const securedDirectivesFunctionsMap = {
+    supportedTypes: () => ['secure', 'redact', 'encrypt'],
     secure: (_, __, ___, ____, _____) => null,
     redact: (_, __, ___, ____, result) => {
         if (!result)
@@ -53,7 +54,7 @@ class DataProtectorHandler {
             if (!result)
                 return result;
             args.parentType = this.fetchParentType(info, args.resource);
-            args.directiveField = this.getDirectiveField(info);
+            args.directiveField = this.getDirectiveField(info, args.resource);
             args.selections = this.getFieldSelections(info);
             if (!lodash_1.default.isEmpty(args.directiveFields))
                 return this.handleforFields(source, args, context, info, result);
@@ -69,7 +70,9 @@ class DataProtectorHandler {
             }
             return [];
         };
-        this.getDirectiveField = (info) => {
+        this.getDirectiveField = (info, resource) => {
+            if (!lodash_1.default.isEmpty(resource))
+                return "";
             return info.parentType.name.toLowerCase() !== 'query' ? info.fieldName : "";
         };
         this.fetchParentType = (info, resource = undefined) => {
@@ -100,7 +103,7 @@ class DataProtectorHandler {
             if (lodash_1.default.isEmpty(result))
                 return result;
             let protectedArr = [];
-            for (let data in result) {
+            for (let data of result) {
                 let protectedData = this.handleForDataType(source, args, context, info, data);
                 if (protectedData && protectedData !== null)
                     protectedArr.push(protectedData);
@@ -145,16 +148,18 @@ class DataProtectorHandler {
     }
     handleForDataType(source, args, context, info, data) {
         console.log('data', args.directiveField);
-        if (typeof data === 'object')
-            return this.handleObjectData(source, args, context, info, data);
         if (lodash_1.default.isArray(data))
             return this.handleListData(source, args, context, info, data);
+        if (typeof data === 'object')
+            return this.handleObjectData(source, args, context, info, data);
         let userAuthority = getUserAuthorityForResource(args.parentType, args.directiveField, context);
-        if (userAuthority === 'read' && info.parentType.name.toLowerCase() === 'query')
+        if (userAuthority === 'read')
             return data;
-        else if (userAuthority === 'write' && info.parentType.name.toLowerCase() === 'query')
+        else if (userAuthority === 'write')
             userAuthority = 'N/A';
-        return securedDirectivesFunctionsMap[userAuthority !== 'N/A' ? userAuthority : args.directiveType](source, args, context, info, data);
+        return securedDirectivesFunctionsMap[userAuthority !== 'N/A'
+            && securedDirectivesFunctionsMap.supportedTypes().includes(userAuthority) ?
+            userAuthority : args.directiveType](source, args, context, info, data);
     }
 }
 exports.DataProtectorHandler = DataProtectorHandler;

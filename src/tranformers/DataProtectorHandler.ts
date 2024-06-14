@@ -55,6 +55,7 @@ const securedDirectivesFunctionsMap: Record<
       result: any,
    ) => Object | null
 > = {
+   supportedTypes: () => ['secure', 'redact', 'encrypt'],
    secure: (_: any, __: any, ___: any, ____: any, _____: any) => null,
    redact: (_: any, __: any, ___: any, ____: any, result: any) => {
       if (!result) return result
@@ -94,7 +95,7 @@ export class DataProtectorHandler implements IDataProtectorHandler {
       if (!result) return result
 
       args.parentType = this.fetchParentType(info, args.resource);
-      args.directiveField = this.getDirectiveField(info);
+      args.directiveField = this.getDirectiveField(info, args.resource);
       args.selections = this.getFieldSelections(info);
       if (!_.isEmpty(args.directiveFields))
          return this.handleforFields(source, args, context, info, result)
@@ -110,7 +111,9 @@ export class DataProtectorHandler implements IDataProtectorHandler {
       }
       return [];
    }
-   getDirectiveField = (info: any) => {
+   getDirectiveField = (info: any, resource: any) => {
+      if (!_.isEmpty(resource))
+         return "";
       return info.parentType.name.toLowerCase() !== 'query' ? info.fieldName : "";
    }
    fetchParentType = (info: any, resource: string | undefined = undefined) => {
@@ -185,7 +188,7 @@ export class DataProtectorHandler implements IDataProtectorHandler {
       if (_.isEmpty(result)) return result
 
       let protectedArr: any[] = []
-      for (let data in result) {
+      for (let data of result) {
          let protectedData: any = this.handleForDataType(source, args, context, info, data);
          if (protectedData && protectedData !== null)
             protectedArr.push(protectedData);
@@ -235,20 +238,23 @@ export class DataProtectorHandler implements IDataProtectorHandler {
       data: any,
    ) {
       console.log('data', args.directiveField)
-      if (typeof data === 'object')
-         return this.handleObjectData(source, args, context, info, data)
       if (_.isArray(data))
          return this.handleListData(source, args, context, info, data)
+      if (typeof data === 'object')
+         return this.handleObjectData(source, args, context, info, data)
 
       let userAuthority = getUserAuthorityForResource(
          args.parentType,
          args.directiveField,
          context,
       )
-      if (userAuthority === 'read' && info.parentType.name.toLowerCase() === 'query') return data
-      else if (userAuthority === 'write' && info.parentType.name.toLowerCase() === 'query') userAuthority = 'N/A';
+      if (userAuthority === 'read') return data
+      else if (userAuthority === 'write') userAuthority = 'N/A';
       return securedDirectivesFunctionsMap[
-         userAuthority !== 'N/A' ? userAuthority : args.directiveType
+         userAuthority !== 'N/A' 
+            // @ts-ignore
+            && securedDirectivesFunctionsMap.supportedTypes().includes(userAuthority)? 
+               userAuthority : args.directiveType
       ](source, args, context, info, data)
    }
 }
