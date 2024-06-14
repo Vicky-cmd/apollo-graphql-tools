@@ -103,7 +103,6 @@ export class DataProtectorHandler implements IDataProtectorHandler {
    }
 
    getFieldSelections = (info: any) => {
-      if (info.parentType.name.toLowerCase() !== 'query') return [];
       for (let field of info.fieldNodes) {
          if (field.selectionSet && info.fieldName === field.name.value) {
             return field.selectionSet.selections;

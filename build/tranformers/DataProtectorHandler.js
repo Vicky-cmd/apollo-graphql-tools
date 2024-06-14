@@ -61,8 +61,6 @@ class DataProtectorHandler {
             return this.handleForDataType(source, args, context, info, result);
         };
         this.getFieldSelections = (info) => {
-            if (info.parentType.name.toLowerCase() !== 'query')
-                return [];
             for (let field of info.fieldNodes) {
                 if (field.selectionSet && info.fieldName === field.name.value) {
                     return field.selectionSet.selections;
