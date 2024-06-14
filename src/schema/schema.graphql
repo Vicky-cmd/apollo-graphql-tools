@@ -1,0 +1,22 @@
+enum CacheControlScope {
+   PUBLIC
+   PRIVATE
+}
+
+enum ProtectionType {
+   secure,
+   encrypt,
+   redact
+}
+
+enum ProtectionType {
+   secure,
+   encrypt,
+   redact
+}
+
+directive @Secured(
+   resource: String
+   type: ProtectionType
+   fields: [String]
+) on  FIELD_DEFINITION | OBJECT | INTERFACE | UNION
