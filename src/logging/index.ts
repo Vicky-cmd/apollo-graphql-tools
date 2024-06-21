@@ -7,7 +7,7 @@ export class Logger {
       return 1
    }
 
-   level: number = this.getLoggingLevel(process.env.NODE_LOGGING_LEVEL)
+   level: number = this.getLoggingLevel(process.env.GRAPHQL_TOOLS_LOGGING_LEVEL)
 
    debug = (...message: any) => {
       if (this.level > 0) return;

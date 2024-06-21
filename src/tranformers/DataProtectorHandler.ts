@@ -1,6 +1,6 @@
 import jsonpath from 'jsonpath'
 import _ from 'lodash'
-import type { Dictionary, IDataProtectorHandler, IEncryptionManager, Node } from '../types'
+import type { Dictionary, IDataProtectorHandler, IEncryptionManager, Node, ProtectorContext } from '../types'
 import { isNumber, isString } from '../utilities'
 import { EncryptionHandler } from '../encryption'
 
@@ -17,27 +17,27 @@ import { EncryptionHandler } from '../encryption'
 
 // }
 
-const getUserAuthorityForResource = (
+const getUserAuthorityForResource = <T extends ProtectorContext>(
    parentType: string,
    directiveField: string,
-   context: any,
+   context: T,
 ) => {
    console.log('directiveField', directiveField);
    // console.log('context', context.authContext);
    if (
       !context.authContext ||
       !context.authContext.authorities ||
-      !context.authContext.authorities[parentType]
+      !context.authContext.authorities.get(parentType)
    )
       return 'N/A';
 
    let defaultAuthority = "N/A";
-   for (let authority of context.authContext.authorities[parentType]) {
+   for (let authority of context.authContext.authorities.get(parentType)!) {
       console.log('authority', authority);
       if (authority.resources.includes(directiveField))
          return authority.authority;
       else if (authority.resources.includes('*'))
-         defaultAuthority = authority.authority;
+         defaultAuthority = authority.authority.toString();
    }
 
    return defaultAuthority;
@@ -80,7 +80,7 @@ const securedDirectivesFunctionsMap: Record<
    },
 }
 
-export class DataProtectorHandler implements IDataProtectorHandler {
+export class DataProtectorHandler<T extends ProtectorContext> implements IDataProtectorHandler<T> {
    constructor(encryptor: IEncryptionManager | undefined = undefined) {
       if (encryptor) encryptionHandler = encryptor;
    }
@@ -88,7 +88,7 @@ export class DataProtectorHandler implements IDataProtectorHandler {
    protectData = (
       source: any,
       args: any,
-      context: any,
+      context: T,
       info: any,
       result: any,
    ): any => {
@@ -123,7 +123,7 @@ export class DataProtectorHandler implements IDataProtectorHandler {
    handleforFields = (
       source: any,
       args: any,
-      context: any,
+      context: T,
       info: any,
       result: any,
    ) => {
@@ -180,7 +180,7 @@ export class DataProtectorHandler implements IDataProtectorHandler {
    handleListData = (
       source: any,
       args: any,
-      context: any,
+      context: T,
       info: any,
       result: object[],
    ) => {
@@ -199,7 +199,7 @@ export class DataProtectorHandler implements IDataProtectorHandler {
    handleObjectData = (
       source: any,
       args: any,
-      context: any,
+      context: T,
       info: any,
       result: String,
    ) => {
@@ -232,7 +232,7 @@ export class DataProtectorHandler implements IDataProtectorHandler {
    handleForDataType(
       source: any,
       args: any,
-      context: any,
+      context: T,
       info: any,
       data: any,
    ) {

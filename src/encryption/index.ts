@@ -3,14 +3,14 @@ import CryptoJS from 'crypto-js'
 
 
 class DefaultEncryptionManagerProps {
-   public defaultAdditionFactor = process.env.GRAPHQL_AUTH_AFACTOR
-      ? parseInt(process.env.GRAPHQL_AUTH_AFACTOR)
+   public defaultAdditionFactor = process.env.GRAPHQL_TOOLS_AUTH_AFACTOR
+      ? parseInt(process.env.GRAPHQL_TOOLS_AUTH_AFACTOR)
       : Math.floor(Math.random() * 100) + 15
-   public defaultMultiplicationFactor = process.env.GRAPHQL_AUTH_MFACTOR
-      ? parseInt(process.env.GRAPHQL_AUTH_MFACTOR)
+   public defaultMultiplicationFactor = process.env.GRAPHQL_TOOLS_AUTH_MFACTOR
+      ? parseInt(process.env.GRAPHQL_TOOLS_AUTH_MFACTOR)
       : Math.floor(Math.random() * 1000) + 354
-   public defaultSecretKey: string = process.env.GRAPHQL_AUTH_SECRET_KEY
-      ? process.env.GRAPHQL_AUTH_SECRET_KEY
+   public defaultSecretKey: string = process.env.GRAPHQL_TOOLS_AUTH_SECRET_KEY
+      ? process.env.GRAPHQL_TOOLS_AUTH_SECRET_KEY
       : 'TESTING_SECRET_KEY'
 
    defaultTokenizationFactors = (additionMultiplier: number = this.defaultAdditionFactor,

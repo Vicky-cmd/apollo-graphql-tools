@@ -1,13 +1,13 @@
 import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils';
 import { defaultFieldResolver, GraphQLObjectType } from 'graphql';
-import type { TProtectedTransformerProps } from '../types/index.js';
+import type { ProtectorContext, TProtectedTransformerProps } from '../types';
 import { extractFields, fieldResolver, fieldResolverForObject } from './fuctions.js';
 import _ from 'lodash';
 
-const protectedDirectiveTransformer = ({
+const protectedDirectiveTransformer = <T extends ProtectorContext> ({
    schema,
    handler,
-}: TProtectedTransformerProps) => {
+}: TProtectedTransformerProps<T>) => {
    const directiveName: string = 'Secured'
    return mapSchema(schema, {
       // This is the object level resolver

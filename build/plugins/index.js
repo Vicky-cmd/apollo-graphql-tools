@@ -10,7 +10,7 @@ const DataProtectorHandler_1 = require("../tranformers/DataProtectorHandler");
 const encryption_1 = require("../encryption");
 const restrictedOperations = ['IntrospectionQuery', '__ApolloGetServiceDefinition__'];
 let config = {
-    handler: new DataProtectorHandler_1.DataProtectorHandler()
+    handler: new DataProtectorHandler_1.DataProtectorHandler(),
 };
 class AuthenticationManagerPlugin {
     constructor(pluginConfig = {
@@ -18,20 +18,19 @@ class AuthenticationManagerPlugin {
         enableSchemaTransform: true,
     }) {
         this.initializeConfig = () => {
-            if (config.enabled === undefined) {
-                config.enabled = true;
-            }
-            else if (config.enabled === false) {
+            if (config.enabled === false) {
                 logging_1.logger.debug('AuthenticationManagerPlugin disabled');
             }
             else {
-                if (config.enableSchemaTransform === undefined) {
-                    config.enableSchemaTransform = true;
+                config.enabled = true;
+                if (!config.authenticationProvider) {
+                    config.authenticationProvider = new authentication_1.GatewayAuthenticationProvider();
                 }
-                else if (config.enableSchemaTransform === false) {
+                if (config.enableSchemaTransform === false) {
                     logging_1.logger.debug('Schema Transform Disabled');
                 }
                 else {
+                    config.enableSchemaTransform = true;
                     if (!config.handler) {
                         if (config.encryptionHandler)
                             config.handler = new DataProtectorHandler_1.DataProtectorHandler(config.encryptionHandler);
@@ -80,6 +79,7 @@ class AuthenticationManagerPlugin {
                     return;
                 let context = await (0, authentication_1.applyAuthenticationContext)({
                     context: reqContext.context,
+                    authenticationProvider: config.authenticationProvider,
                 });
                 if (context)
                     reqContext = {

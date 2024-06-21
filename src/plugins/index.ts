@@ -6,6 +6,7 @@ import type {
 } from 'apollo-server-plugin-base';
 import { execute } from 'graphql/execution/execute.js';
 import {
+   GatewayAuthenticationProvider,
    applyAuthenticationContext,
 } from '../authentication';
 import { logger } from '../logging';
@@ -22,15 +23,17 @@ import { EncryptionHandler } from '../encryption';
 
 const restrictedOperations = ['IntrospectionQuery', '__ApolloGetServiceDefinition__']
 
-let config: IAuthPluginOptions = {
-   handler: new DataProtectorHandler()
+type G = any;
+
+let config: IAuthPluginOptions<G extends ProtectorContext ? G : ProtectorContext> = {
+   handler: new DataProtectorHandler(),
 };
 
 export class AuthenticationManagerPlugin<
    T extends ProtectorContext & ExpressContext
 > implements ApolloServerPlugin<T> {
 
-   constructor(pluginConfig: IAuthPluginOptions = {
+   constructor(pluginConfig: IAuthPluginOptions<T> = {
       enabled: true,
       enableSchemaTransform: true,
    }) {
@@ -39,16 +42,17 @@ export class AuthenticationManagerPlugin<
    }
 
    initializeConfig = () => {
-      if (config.enabled === undefined) {
-         config.enabled = true;
-      } else if (config.enabled === false) {
+      if (config.enabled === false) {
          logger.debug('AuthenticationManagerPlugin disabled');
       } else {
-         if (config.enableSchemaTransform === undefined) {
-            config.enableSchemaTransform = true;
-         } else if (config.enableSchemaTransform === false) {
+         config.enabled = true;
+         if (!config.authenticationProvider) {
+            config.authenticationProvider = new GatewayAuthenticationProvider();
+         }
+         if (config.enableSchemaTransform === false) {
             logger.debug('Schema Transform Disabled');
          } else {
+            config.enableSchemaTransform = true;
             if (!config.handler) {
                if (config.encryptionHandler) config.handler = new DataProtectorHandler(config.encryptionHandler);
                else if (config.encryptionProps) config.handler = new DataProtectorHandler(new EncryptionHandler(config.encryptionProps));
@@ -96,6 +100,7 @@ export class AuthenticationManagerPlugin<
 
             let context = await applyAuthenticationContext<T>({
                context: reqContext.context,
+               authenticationProvider: config.authenticationProvider,
             });
             if (context)
                reqContext = {

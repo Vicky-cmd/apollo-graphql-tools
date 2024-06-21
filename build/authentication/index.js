@@ -1,101 +1,28 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.applyAuthenticationContext = exports.authenticationContextProvidor = exports.AuthenticationProvider = void 0;
-const apollo_server_express_1 = require("apollo-server-express");
-const axios_1 = require("axios");
-const index_js_1 = require("../logging/index.js");
-const axios_js_1 = __importDefault(require("../services/axios.js"));
-const utils_1 = require("../utils");
-class AuthenticationProvider {
-    constructor(props) {
-        this.authServiceURI = process.env.authServiceURI
-            ? process.env.authServiceURI
-            : 'http://localhost:8555/api/v1/validateToken';
-        this.logger = new index_js_1.Logger();
-        this.logger.debug('Initializing AuthenticationProvider: ', props);
-        if (props.authServiceURI)
-            this.authServiceURI = props.authServiceURI.toString();
-    }
-    async authenticate(tokenDetails) {
-        try {
-            let response = await axios_js_1.default.get(this.authServiceURI, {
-                headers: {
-                    Authorization: tokenDetails.authorization.toString(),
-                },
-            });
-            return {
-                authContext: response.data,
-            };
-        }
-        catch (e) {
-            this.logger.error('Error in AuthenticationProvider: ', e);
-            if (e instanceof axios_1.AxiosError && e.response) {
-                let status = e.status ? e.status : (e.response.status ? e.response.status : 500);
-                throw new apollo_server_express_1.ApolloError(utils_1.HTTPStatus[status], String(status));
-            }
-        }
-        throw new apollo_server_express_1.ApolloError('AUTHENTICATION_FAILURE', '500');
-    }
-}
-exports.AuthenticationProvider = AuthenticationProvider;
-const getContext = async (context, rootContext) => {
-    if (context) {
-        if (typeof context === 'function')
-            return await context(rootContext);
-        else
-            return context;
-    }
-    return rootContext;
-};
-const authenticationContextProvidor = (props) => {
-    let provider = new AuthenticationProvider({});
-    return async (context) => {
-        var _a;
-        let req = context.req;
-        if (!req.headers.authorization)
-            throw new apollo_server_express_1.ApolloError('Unathorized', '401');
-        const token = req.headers.authorization || '';
-        try {
-            let protectorContext = await provider.authenticate({
-                authorization: token,
-                req,
-            });
-            context = await getContext(props.context, context);
-            context.authContext = protectorContext.authContext;
-            return context;
-        }
-        catch (e) {
-            console.error((e instanceof axios_1.AxiosError) ? (_a = e.response) === null || _a === void 0 ? void 0 : _a.data : e);
-            throw new apollo_server_express_1.AuthenticationError('Authentication Failed!');
-        }
-    };
-};
-exports.authenticationContextProvidor = authenticationContextProvidor;
-const applyAuthenticationContext = async (props) => {
-    let { context } = props;
-    let provider = new AuthenticationProvider({});
-    let req = context.req;
-    if (!req.headers.authorization)
-        throw new apollo_server_express_1.ApolloError('Unathorized', '401');
-    const token = req.headers.authorization || '';
-    context = await getContext(props.context, context);
-    try {
-        let protectorContext = await provider.authenticate({
-            authorization: token,
-            req,
-        });
-        context.authContext = protectorContext.authContext;
-    }
-    catch (e) {
-        context.authContext = {
-            token: 'AUTHERROR',
-            errorDetails: (e instanceof apollo_server_express_1.ApolloError) ? e : new apollo_server_express_1.AuthenticationError('Authentication Failed!'),
-        };
-    }
-    return context;
-};
-exports.applyAuthenticationContext = applyAuthenticationContext;
+exports.MongoAuthoritiesProvider = exports.Oauth2AuthenticatorProvider = exports.GatewayAuthenticationProvider = exports.authenticationContextProvidor = exports.applyAuthenticationContext = void 0;
+var functions_1 = require("./functions");
+Object.defineProperty(exports, "applyAuthenticationContext", { enumerable: true, get: function () { return functions_1.applyAuthenticationContext; } });
+Object.defineProperty(exports, "authenticationContextProvidor", { enumerable: true, get: function () { return functions_1.authenticationContextProvidor; } });
+var GatewayAuthenticator_1 = require("./GatewayAuthenticator");
+Object.defineProperty(exports, "GatewayAuthenticationProvider", { enumerable: true, get: function () { return GatewayAuthenticator_1.GatewayAuthenticationProvider; } });
+var Oauth2Authenticator_1 = require("./Oauth2Authenticator");
+Object.defineProperty(exports, "Oauth2AuthenticatorProvider", { enumerable: true, get: function () { return Oauth2Authenticator_1.Oauth2AuthenticatorProvider; } });
+var AuthoritiesProvider_1 = require("./AuthoritiesProvider");
+Object.defineProperty(exports, "MongoAuthoritiesProvider", { enumerable: true, get: function () { return AuthoritiesProvider_1.MongoAuthoritiesProvider; } });
+__exportStar(require("./types"), exports);
 //# sourceMappingURL=index.js.map

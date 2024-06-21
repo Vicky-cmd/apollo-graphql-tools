@@ -12,15 +12,15 @@ const getUserAuthorityForResource = (parentType, directiveField, context) => {
     console.log('directiveField', directiveField);
     if (!context.authContext ||
         !context.authContext.authorities ||
-        !context.authContext.authorities[parentType])
+        !context.authContext.authorities.get(parentType))
         return 'N/A';
     let defaultAuthority = "N/A";
-    for (let authority of context.authContext.authorities[parentType]) {
+    for (let authority of context.authContext.authorities.get(parentType)) {
         console.log('authority', authority);
         if (authority.resources.includes(directiveField))
             return authority.authority;
         else if (authority.resources.includes('*'))
-            defaultAuthority = authority.authority;
+            defaultAuthority = authority.authority.toString();
     }
     return defaultAuthority;
 };

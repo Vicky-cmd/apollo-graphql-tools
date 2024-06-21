@@ -7,14 +7,14 @@ exports.EncryptionHandler = void 0;
 const crypto_js_1 = __importDefault(require("crypto-js"));
 class DefaultEncryptionManagerProps {
     constructor() {
-        this.defaultAdditionFactor = process.env.GRAPHQL_AUTH_AFACTOR
-            ? parseInt(process.env.GRAPHQL_AUTH_AFACTOR)
+        this.defaultAdditionFactor = process.env.GRAPHQL_TOOLS_AUTH_AFACTOR
+            ? parseInt(process.env.GRAPHQL_TOOLS_AUTH_AFACTOR)
             : Math.floor(Math.random() * 100) + 15;
-        this.defaultMultiplicationFactor = process.env.GRAPHQL_AUTH_MFACTOR
-            ? parseInt(process.env.GRAPHQL_AUTH_MFACTOR)
+        this.defaultMultiplicationFactor = process.env.GRAPHQL_TOOLS_AUTH_MFACTOR
+            ? parseInt(process.env.GRAPHQL_TOOLS_AUTH_MFACTOR)
             : Math.floor(Math.random() * 1000) + 354;
-        this.defaultSecretKey = process.env.GRAPHQL_AUTH_SECRET_KEY
-            ? process.env.GRAPHQL_AUTH_SECRET_KEY
+        this.defaultSecretKey = process.env.GRAPHQL_TOOLS_AUTH_SECRET_KEY
+            ? process.env.GRAPHQL_TOOLS_AUTH_SECRET_KEY
             : 'TESTING_SECRET_KEY';
         this.defaultTokenizationFactors = (additionMultiplier = this.defaultAdditionFactor, multiplicationMultiplier = this.defaultMultiplicationFactor) => ({
             1: {

@@ -9,7 +9,7 @@ class Logger {
                 return this.loggingLevels.indexOf(level);
             return 1;
         };
-        this.level = this.getLoggingLevel(process.env.NODE_LOGGING_LEVEL);
+        this.level = this.getLoggingLevel(process.env.GRAPHQL_TOOLS_LOGGING_LEVEL);
         this.debug = (...message) => {
             if (this.level > 0)
                 return;
