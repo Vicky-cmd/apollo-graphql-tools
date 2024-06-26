@@ -47,12 +47,12 @@ export interface IAuthenticationProviderProps<T extends ProtectorContext> {
 export type AuthenticationProviderProps = {
     authoritiesProvider?: IAuthoritiesProvider
     mongoConfig?: MongoAuthoritiesProviderProps
+    enableAuthoritiesProvider?: boolean
 }
 
 export type IGatewayAuthenticationProviderProps = AuthenticationProviderProps & {
     filterField?: string
     validateTokenEndpoint?: string
-    enableAuthoritiesProvider?: boolean
 }
 
 export type IOauth2AuthenticatorProviderProps = AuthenticationProviderProps & {

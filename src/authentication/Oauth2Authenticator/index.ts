@@ -7,17 +7,18 @@ import { AxiosError, AxiosResponse } from "axios";
 import { ApolloError } from "apollo-server-express";
 import { HTTPStatus } from "../../utils";
 
-export class Oauth2AuthenticatorProvider<T extends ProtectorContext> implements IAuthenticationProvider<T>{
+export class Oauth2AuthenticatorProvider<T extends ProtectorContext> implements IAuthenticationProvider<T> {
 
     private userinfo_endpoint: string = "";
     private openidConfiguration: Dictionary<Object> = {};
     private logger: Logger = new Logger();
-    private authoritiesProvider: IAuthoritiesProvider;
+    private authoritiesProvider: IAuthoritiesProvider | undefined;
 
-    constructor(props: IOauth2AuthenticatorProviderProps = {}) {
-        if (process.env.GRAPHQL_TOOLS_VALIDATE_TOKEN_ENDPOINT)
-            this.userinfo_endpoint = process.env.GRAPHQL_TOOLS_VALIDATE_TOKEN_ENDPOINT.toString();
-        else if (props.userinfo_endpoint)
+    constructor(props: IOauth2AuthenticatorProviderProps = {
+        enableAuthoritiesProvider: false,
+    }) {
+
+        if (props.userinfo_endpoint)
             this.userinfo_endpoint = props.userinfo_endpoint.toString();
         else if (props.issuer && props.domain) {
             axios.get(`https://${props.domain}/oauth2/${props.issuer}/.well-known/openid-configuration`).then((response) => {
@@ -26,9 +27,12 @@ export class Oauth2AuthenticatorProvider<T extends ProtectorContext> implements 
             }).catch((err) => {
                 throw new Error("Error fetching token endpoint from issuer: " + err);
             });
-        } else
+        } else if (process.env.GRAPHQL_TOOLS_VALIDATE_TOKEN_ENDPOINT)
+            this.userinfo_endpoint = process.env.GRAPHQL_TOOLS_VALIDATE_TOKEN_ENDPOINT.toString();
+        else
             throw new Error("Missing Oauth2 Mandatory Configuration. Please provide either userinfo_endpoint or issuer and domain.");
 
+        if (props.enableAuthoritiesProvider !== undefined && !props.enableAuthoritiesProvider) return;
         if (props.authoritiesProvider)
             this.authoritiesProvider = props.authoritiesProvider
         else if (props.mongoConfig)
@@ -48,7 +52,7 @@ export class Oauth2AuthenticatorProvider<T extends ProtectorContext> implements 
                 throw new ApolloError(HTTPStatus[401], "401");
             }
 
-            let authorities = await this.authoritiesProvider.getAuthorities(response.data.sub.toString());
+            let authorities = this.authoritiesProvider ? await this.authoritiesProvider.getAuthorities(response.data.sub.toString()) : new Map();
             return <ProtectorContext>{
                 authContext: {
                     status: "200",

@@ -15,7 +15,7 @@ import type {
 import { HTTPStatus } from '../../utils';
 import { MongoAuthoritiesProvider } from '../AuthoritiesProvider';
 
-export class GatewayAuthenticationProvider<T extends ProtectorContext> implements IAuthenticationProvider<T>{
+export class GatewayAuthenticationProvider<T extends ProtectorContext> implements IAuthenticationProvider<T> {
 
     private logger: Logger = new Logger();
     private validateTokenEndpoint: string;
@@ -23,14 +23,14 @@ export class GatewayAuthenticationProvider<T extends ProtectorContext> implement
     private filterField: string = "userID";
 
     constructor(props: IGatewayAuthenticationProviderProps = {
-        enableAuthoritiesProvider: true,
+        enableAuthoritiesProvider: false,
         filterField: "userID"
     }) {
         this.logger.debug('Initializing AuthenticationProvider: ', props);
-        if (process.env.GRAPHQL_TOOLS_VALIDATE_TOKEN_ENDPOINT)
-            this.validateTokenEndpoint = process.env.GRAPHQL_TOOLS_VALIDATE_TOKEN_ENDPOINT.toString();
-        else if (props.validateTokenEndpoint)
+        if (props.validateTokenEndpoint)
             this.validateTokenEndpoint = props.validateTokenEndpoint.toString();
+        else if (process.env.GRAPHQL_TOOLS_VALIDATE_TOKEN_ENDPOINT)
+            this.validateTokenEndpoint = process.env.GRAPHQL_TOOLS_VALIDATE_TOKEN_ENDPOINT.toString();
         else
             this.validateTokenEndpoint = 'http://localhost:8555/api/v1/validateToken';
 
