@@ -1,6 +1,6 @@
 {
    "name": "@infotrends/apollo-graphql-tools",
-   "version": "1.0.0",
+   "version": "0.0.1",
    "description": "This is plugin application that can be used to implement protection Apollo GraphQL Server",
    "main": "build/index.js",
    "types": "build/index.d.ts",
